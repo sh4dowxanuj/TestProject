@@ -23,6 +23,20 @@ allprojects {
     buildDir = "/tmp/gradle-builds/TestProject/${project.name}"
 }
 
+// Custom task to build APKs and copy to project directory
+task buildApks {
+    description = 'Build APKs and copy them to the project directory'
+    group = 'build'
+    dependsOn ':app:assembleDebug', ':app:assembleRelease'
+    
+    doLast {
+        println "APKs generated successfully in ${rootProject.projectDir}/apk/"
+        println "Debug APK: TestProject-debug-1.0.apk"
+        println "Release APK: TestProject-release-1.0.apk"
+    }
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
+    delete "${rootProject.projectDir}/apk"
 }

@@ -7,11 +7,13 @@
 .externalNativeBuild
 .cxx
 *.apk
+!apk/*.apk
 output.json
 
 # External build directories (configured in build.gradle)
 # Build artifacts are now stored in /tmp/gradle-builds/TestProject/
 # and cache in /tmp/gradle-cache/TestProject/
+# APK files are copied to /apk directory in project root
 
 # Local configuration files
 local.properties
