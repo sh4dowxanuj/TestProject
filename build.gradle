@@ -1,4 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+// Set build directory outside project
+buildDir = "/tmp/gradle-builds/TestProject"
+
 buildscript {
     repositories {
         google()
@@ -14,6 +18,9 @@ allprojects {
         google()
         mavenCentral()
     }
+    
+    // Set build directory for all subprojects
+    buildDir = "/tmp/gradle-builds/TestProject/${project.name}"
 }
 
 task clean(type: Delete) {
