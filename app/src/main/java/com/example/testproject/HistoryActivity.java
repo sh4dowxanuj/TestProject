@@ -1,6 +1,7 @@
 package com.example.testproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,6 +10,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.example.testproject.adapters.HistoryAdapter;
 import com.example.testproject.database.DatabaseHelper;
@@ -18,6 +21,7 @@ import java.util.List;
 
 public class HistoryActivity extends AppCompatActivity implements HistoryAdapter.OnHistoryClickListener {
     private RecyclerView recyclerView;
+    private LinearLayout emptyState;
     private HistoryAdapter adapter;
     private DatabaseHelper databaseHelper;
 
@@ -26,20 +30,23 @@ public class HistoryActivity extends AppCompatActivity implements HistoryAdapter
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
 
-        setupActionBar();
+        setupToolbar();
         initializeViews();
         loadHistory();
     }
 
-    private void setupActionBar() {
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("History");
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
     }
 
     private void initializeViews() {
         recyclerView = findViewById(R.id.recyclerView);
+        emptyState = findViewById(R.id.emptyState);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         databaseHelper = new DatabaseHelper(this);
@@ -47,8 +54,16 @@ public class HistoryActivity extends AppCompatActivity implements HistoryAdapter
 
     private void loadHistory() {
         List<HistoryItem> historyItems = databaseHelper.getAllHistory();
-        adapter = new HistoryAdapter(historyItems, this);
-        recyclerView.setAdapter(adapter);
+        
+        if (historyItems.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            emptyState.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyState.setVisibility(View.GONE);
+            adapter = new HistoryAdapter(historyItems, this);
+            recyclerView.setAdapter(adapter);
+        }
     }
 
     @Override

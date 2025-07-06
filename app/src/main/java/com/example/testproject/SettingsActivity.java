@@ -1,6 +1,7 @@
 package com.example.testproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,15 +19,17 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        setupActionBar();
+        setupToolbar();
         initializeViews();
         setupEventListeners();
     }
 
-    private void setupActionBar() {
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Settings");
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
     }
 

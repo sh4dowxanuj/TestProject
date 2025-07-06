@@ -5,9 +5,13 @@
     android:background="@drawable/tab_background"
     android:gravity="center_vertical"
     android:minWidth="120dp"
+    android:maxWidth="200dp"
     android:orientation="horizontal"
-    android:paddingStart="8dp"
-    android:paddingEnd="4dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="8dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    android:layout_marginEnd="2dp">
 
     <TextView
         android:id="@+id/tabTitle"
@@ -17,15 +21,18 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="New Tab"
-        android:textColor="@android:color/white"
-        android:textSize="12sp" />
+        android:textColor="@color/tab_text_normal"
+        android:textSize="13sp"
+        android:fontFamily="sans-serif-medium" />
 
     <ImageButton
         android:id="@+id/closeTab"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Close Tab"
+        android:scaleType="centerInside"
         android:src="@drawable/ic_close" />
 
 </LinearLayout>

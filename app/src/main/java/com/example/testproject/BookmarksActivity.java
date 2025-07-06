@@ -1,6 +1,7 @@
 package com.example.testproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -8,6 +9,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.example.testproject.adapters.BookmarkAdapter;
 import com.example.testproject.database.DatabaseHelper;
@@ -17,6 +20,7 @@ import java.util.List;
 
 public class BookmarksActivity extends AppCompatActivity implements BookmarkAdapter.OnBookmarkClickListener {
     private RecyclerView recyclerView;
+    private LinearLayout emptyState;
     private BookmarkAdapter adapter;
     private DatabaseHelper databaseHelper;
 
@@ -25,20 +29,23 @@ public class BookmarksActivity extends AppCompatActivity implements BookmarkAdap
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bookmarks);
 
-        setupActionBar();
+        setupToolbar();
         initializeViews();
         loadBookmarks();
     }
 
-    private void setupActionBar() {
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Bookmarks");
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
     }
 
     private void initializeViews() {
         recyclerView = findViewById(R.id.recyclerView);
+        emptyState = findViewById(R.id.emptyState);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         
         databaseHelper = new DatabaseHelper(this);
@@ -46,8 +53,16 @@ public class BookmarksActivity extends AppCompatActivity implements BookmarkAdap
 
     private void loadBookmarks() {
         List<Bookmark> bookmarks = databaseHelper.getAllBookmarks();
-        adapter = new BookmarkAdapter(bookmarks, this);
-        recyclerView.setAdapter(adapter);
+        
+        if (bookmarks.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            emptyState.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyState.setVisibility(View.GONE);
+            adapter = new BookmarkAdapter(bookmarks, this);
+            recyclerView.setAdapter(adapter);
+        }
     }
 
     @Override
