@@ -22,9 +22,29 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    
+    // Configure APK output to project directory
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                def fileName = "TestProject-${variant.name}-${variant.versionName}.apk"
+                outputFileName = fileName
+                // Copy APK to project root after build
+                variant.assemble.doLast {
+                    copy {
+                        from outputFile.parent
+                        into "${rootProject.projectDir}/apk"
+                        include fileName
+                    }
+                }
+            }
+        }
     }
 }
 
