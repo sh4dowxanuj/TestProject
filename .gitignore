@@ -1,0 +1,67 @@
+# Gradle files
+.gradle/
+/local.properties
+/.gradle
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+output.json
+
+# Local configuration files
+local.properties
+
+# Android Studio files
+*.iml
+.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IntelliJ
+*.iws
+/out/
+.idea/
+
+# User-specific configurations
+.idea/libraries/
+.idea/caches/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/.name
+.idea/compiler.xml
+.idea/copyright/profiles_settings.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/vcs.xml
+*.iws
+
+# Keystore files
+*.jks
+*.keystore
+
+# External native build folder generated in Android Studio 2.2 and later
+.externalNativeBuild
+
+# Google Services (e.g. APIs or Firebase)
+google-services.json
+
+# Freeline
+freeline.py
+freeline/
+freeline_project_description.json
