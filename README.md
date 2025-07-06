@@ -19,11 +19,6 @@ The Android SDK has been successfully installed and configured at `/opt/android-
 - Android SDK Build Tools 34.0.0
 - Android SDK Platform Tools
 
-**Build Results:**
-- ✅ **APK Generated**: `app/build/outputs/apk/debug/app-debug.apk` (5.5 MB)
-- ✅ **Build Time**: ~46 seconds
-- ✅ **All Dependencies**: Successfully resolved and downloaded
-
 ## Build Instructions
 
 ### Prerequisites
