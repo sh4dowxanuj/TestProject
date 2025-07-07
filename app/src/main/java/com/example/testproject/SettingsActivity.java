@@ -19,9 +19,16 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        setupSystemBars();
         setupToolbar();
         initializeViews();
         setupEventListeners();
+    }
+
+    private void setupSystemBars() {
+        // Set status bar and navigation bar colors for dark theme
+        getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background, getTheme()));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background, getTheme()));
     }
 
     private void setupToolbar() {

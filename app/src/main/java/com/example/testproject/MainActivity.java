@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -58,6 +59,13 @@ public class MainActivity extends AppCompatActivity {
         
         // Create initial tab
         createNewTab(DEFAULT_URL);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Handle orientation change without recreating activity
+        // WebView and all state will be preserved
     }
 
     private void enableNormalMode() {

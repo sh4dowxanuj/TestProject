@@ -12,13 +12,13 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/dark_surface"
         android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="Bookmarks"
-        app:titleTextColor="?attr/colorOnPrimary" />
+        app:titleTextColor="@color/text_primary_dark" />
 
     <!-- Empty State -->
     <LinearLayout

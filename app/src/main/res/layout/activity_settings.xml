@@ -12,13 +12,13 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/dark_surface"
         android:elevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:title="Settings"
-        app:titleTextColor="?attr/colorOnPrimary" />
+        app:titleTextColor="@color/text_primary_dark" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -80,8 +80,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
-                            android:thumbTint="@color/primary_blue"
-                            android:trackTint="@color/primary_blue_light" />
+                            android:thumbTint="@color/dark_primary"
+                            android:trackTint="@color/dark_primary_variant" />
 
                     </LinearLayout>
 
