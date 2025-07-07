@@ -2,7 +2,6 @@ package com.example.testproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,7 +34,6 @@ public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_URL = "https://www.google.com";
     private static final String SEARCH_URL = "https://www.google.com/search?q=";
 
-    private Toolbar toolbar;
     private LinearLayout tabContainer;
     private HorizontalScrollView tabScrollView;
     private EditText urlEditText;
@@ -46,23 +44,36 @@ public class MainActivity extends AppCompatActivity {
     private List<BrowserTab> tabs;
     private int currentTabIndex = -1;
     private DatabaseHelper databaseHelper;
+    private boolean isInFullscreenVideo = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Enable fullscreen for web content
+        enableFullscreenMode();
+        
         setContentView(R.layout.activity_main);
 
         initializeViews();
         initializeDatabase();
-        setupToolbar();
         setupEventListeners();
         
         // Create initial tab
         createNewTab(DEFAULT_URL);
     }
 
+    private void enableFullscreenMode() {
+        // Hide the status bar for immersive experience
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+        );
+    }
+
     private void initializeViews() {
-        toolbar = findViewById(R.id.toolbar);
         tabContainer = findViewById(R.id.tabContainer);
         tabScrollView = findViewById(R.id.tabScrollView);
         urlEditText = findViewById(R.id.urlEditText);
@@ -79,13 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeDatabase() {
         databaseHelper = new DatabaseHelper(this);
-    }
-
-    private void setupToolbar() {
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
     }
 
     private void setupEventListeners() {
@@ -181,6 +185,12 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
+        
+        // Enable fullscreen video support
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        webSettings.setAllowFileAccessFromFileURLs(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
+        webSettings.setPluginState(WebSettings.PluginState.ON);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -222,6 +232,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
+            private View customView;
+            private CustomViewCallback customViewCallback;
+            
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
                 super.onProgressChanged(view, newProgress);
@@ -240,6 +253,59 @@ public class MainActivity extends AppCompatActivity {
                         currentTab.setTitle(title);
                         updateTabTitle(currentTabIndex);
                     }
+                }
+            }
+            
+            @Override
+            public void onShowCustomView(View view, CustomViewCallback callback) {
+                // Handle fullscreen video
+                if (customView != null) {
+                    onHideCustomView();
+                    return;
+                }
+                
+                customView = view;
+                customViewCallback = callback;
+                isInFullscreenVideo = true;
+                
+                // Hide browser UI elements
+                if (tabScrollView != null) tabScrollView.setVisibility(View.GONE);
+                findViewById(R.id.navigationBar).setVisibility(View.GONE);
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                
+                // Make fullscreen
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_FULLSCREEN |
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                );
+                
+                // Add custom view to container
+                webViewContainer.addView(customView, new FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                ));
+            }
+            
+            @Override
+            public void onHideCustomView() {
+                if (customView == null) return;
+                
+                // Remove custom view
+                webViewContainer.removeView(customView);
+                customView = null;
+                isInFullscreenVideo = false;
+                
+                // Show browser UI elements
+                if (tabScrollView != null) tabScrollView.setVisibility(View.VISIBLE);
+                findViewById(R.id.navigationBar).setVisibility(View.VISIBLE);
+                
+                // Restore normal fullscreen mode
+                enableFullscreenMode();
+                
+                if (customViewCallback != null) {
+                    customViewCallback.onCustomViewHidden();
+                    customViewCallback = null;
                 }
             }
         });
@@ -495,6 +561,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        // Handle fullscreen video exit
+        if (isInFullscreenVideo) {
+            WebView currentWebView = getCurrentWebView();
+            if (currentWebView != null) {
+                // This will trigger onHideCustomView in WebChromeClient
+                currentWebView.evaluateJavascript("document.exitFullscreen();", null);
+            }
+            return;
+        }
+        
+        // Handle regular web navigation
         WebView currentWebView = getCurrentWebView();
         if (currentWebView != null && currentWebView.canGoBack()) {
             currentWebView.goBack();
