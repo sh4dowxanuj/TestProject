@@ -6,10 +6,10 @@
             <corners 
                 android:topLeftRadius="8dp"
                 android:topRightRadius="8dp" />
-            <solid android:color="@color/tab_background_selected" />
+            <solid android:color="@color/tab_background_selected_dark" />
             <stroke
                 android:width="1dp"
-                android:color="@color/primary_blue_dark" />
+                android:color="@color/dark_primary_variant" />
         </shape>
     </item>
     
@@ -19,10 +19,10 @@
             <corners 
                 android:topLeftRadius="8dp"
                 android:topRightRadius="8dp" />
-            <solid android:color="@color/tab_background" />
+            <solid android:color="@color/tab_background_dark" />
             <stroke
                 android:width="1dp"
-                android:color="@color/gray_medium" />
+                android:color="@color/dark_surface_variant" />
         </shape>
     </item>
 </selector>

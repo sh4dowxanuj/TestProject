@@ -8,6 +8,17 @@
     <color name="accent_orange">#FF9800</color>
     <color name="accent_orange_dark">#F57C00</color>
     
+    <!-- Dark Theme Colors -->
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_surface_variant">#2D2D2D</color>
+    <color name="dark_on_background">#E0E0E0</color>
+    <color name="dark_on_surface">#E0E0E0</color>
+    <color name="dark_primary">#64B5F6</color>
+    <color name="dark_primary_variant">#42A5F5</color>
+    <color name="dark_secondary">#FFB74D</color>
+    <color name="dark_accent">#FF8A65</color>
+    
     <!-- Original colors (kept for compatibility) -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
@@ -22,13 +33,29 @@
     <color name="gray_medium">#BDBDBD</color>
     <color name="gray_dark">#424242</color>
     
-    <!-- Tab colors -->
+    <!-- Light Theme Tab colors -->
     <color name="tab_background">#E3F2FD</color>
     <color name="tab_background_selected">#2196F3</color>
     <color name="tab_text_normal">#424242</color>
     <color name="tab_text_selected">#FFFFFF</color>
     
-    <!-- URL bar colors -->
+    <!-- Dark Theme Tab colors -->
+    <color name="tab_background_dark">#2D2D2D</color>
+    <color name="tab_background_selected_dark">#64B5F6</color>
+    <color name="tab_text_normal_dark">#E0E0E0</color>
+    <color name="tab_text_selected_dark">#121212</color>
+    
+    <!-- Light Theme URL bar colors -->
     <color name="url_bar_background">#FFFFFF</color>
     <color name="url_bar_border">#E0E0E0</color>
+    
+    <!-- Dark Theme URL bar colors -->
+    <color name="url_bar_background_dark">#2D2D2D</color>
+    <color name="url_bar_border_dark">#424242</color>
+    
+    <!-- Text colors -->
+    <color name="text_primary_light">#212121</color>
+    <color name="text_secondary_light">#757575</color>
+    <color name="text_primary_dark">#E0E0E0</color>
+    <color name="text_secondary_dark">#B0B0B0</color>
 </resources>

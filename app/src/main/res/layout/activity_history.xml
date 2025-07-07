@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_light"
+    android:background="@color/dark_background"
     tools:context=".HistoryActivity">
 
     <!-- Toolbar -->
@@ -38,14 +38,14 @@
             android:layout_height="64dp"
             android:alpha="0.5"
             android:src="@drawable/ic_history"
-            android:tint="@color/gray_medium" />
+            android:tint="@color/text_secondary_dark" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="No history yet"
-            android:textColor="@color/gray_medium"
+            android:textColor="@color/text_secondary_dark"
             android:textSize="16sp" />
 
         <TextView
