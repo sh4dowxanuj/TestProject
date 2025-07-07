@@ -50,9 +50,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Enable fullscreen for web content
-        enableFullscreenMode();
-        
         setContentView(R.layout.activity_main);
 
         initializeViews();
@@ -63,8 +60,15 @@ public class MainActivity extends AppCompatActivity {
         createNewTab(DEFAULT_URL);
     }
 
+    private void enableNormalMode() {
+        // Normal browsing mode with status bar visible
+        getWindow().getDecorView().setSystemUiVisibility(
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        );
+    }
+
     private void enableFullscreenMode() {
-        // Hide the status bar for immersive experience
+        // Full immersive mode for video content
         getWindow().getDecorView().setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
@@ -154,43 +158,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createNewTab(String url) {
-        BrowserTab tab = new BrowserTab("New Tab", url);
-        WebView webView = createWebView();
-        tab.setWebView(webView);
-        tabs.add(tab);
+        try {
+            BrowserTab tab = new BrowserTab("New Tab", url);
+            WebView webView = createWebView();
+            if (webView == null) return; // Safety check
+            
+            tab.setWebView(webView);
+            tabs.add(tab);
 
-        // Create tab UI
-        View tabView = createTabView(tab, tabs.size() - 1);
-        tabContainer.addView(tabView);
+            // Create tab UI
+            View tabView = createTabView(tab, tabs.size() - 1);
+            if (tabView != null && tabContainer != null) {
+                tabContainer.addView(tabView);
+            }
 
-        // Add new tab button if this is the first tab
-        if (tabs.size() == 1) {
-            addNewTabButton();
+            // Add new tab button if this is the first tab
+            if (tabs.size() == 1) {
+                addNewTabButton();
+            }
+
+            // Switch to new tab
+            switchToTab(tabs.size() - 1);
+            
+            // Load URL safely
+            if (webView != null && url != null && !url.isEmpty()) {
+                webView.loadUrl(url);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle the error gracefully, maybe show a toast
+            if (this != null && !isDestroyed()) {
+                Toast.makeText(this, "Error creating new tab", Toast.LENGTH_SHORT).show();
+            }
         }
-
-        // Switch to new tab
-        switchToTab(tabs.size() - 1);
-        
-        // Load URL
-        webView.loadUrl(url);
     }
 
     private WebView createWebView() {
-        WebView webView = new WebView(this);
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setAllowFileAccess(true);
-        webSettings.setAllowContentAccess(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setBuiltInZoomControls(true);
-        webSettings.setDisplayZoomControls(false);
-        
-        // Enable fullscreen video support
-        webSettings.setMediaPlaybackRequiresUserGesture(false);
-        webSettings.setAllowFileAccessFromFileURLs(true);
-        webSettings.setAllowUniversalAccessFromFileURLs(true);
-        webSettings.setPluginState(WebSettings.PluginState.ON);
+        try {
+            WebView webView = new WebView(this);
+            WebSettings webSettings = webView.getSettings();
+            webSettings.setJavaScriptEnabled(true);
+            webSettings.setDomStorageEnabled(true);
+            webSettings.setAllowFileAccess(true);
+            webSettings.setAllowContentAccess(true);
+            webSettings.setSupportZoom(true);
+            webSettings.setBuiltInZoomControls(true);
+            webSettings.setDisplayZoomControls(false);
+            
+            // Enable fullscreen video support
+            webSettings.setMediaPlaybackRequiresUserGesture(false);
+            webSettings.setAllowFileAccessFromFileURLs(true);
+            webSettings.setAllowUniversalAccessFromFileURLs(true);
+            webSettings.setPluginState(WebSettings.PluginState.ON);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -300,8 +319,8 @@ public class MainActivity extends AppCompatActivity {
                 if (tabScrollView != null) tabScrollView.setVisibility(View.VISIBLE);
                 findViewById(R.id.navigationBar).setVisibility(View.VISIBLE);
                 
-                // Restore normal fullscreen mode
-                enableFullscreenMode();
+                // Restore normal browsing mode (with status bar)
+                enableNormalMode();
                 
                 if (customViewCallback != null) {
                     customViewCallback.onCustomViewHidden();
@@ -311,6 +330,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         return webView;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     private View createTabView(BrowserTab tab, int index) {
@@ -322,10 +345,17 @@ public class MainActivity extends AppCompatActivity {
             tabTitle.setText(tab.getTitle());
         }
         
+        // Store the tab reference in the view's tag to avoid index issues
+        tabView.setTag(tab);
+        
         tabView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switchToTab(index);
+                BrowserTab clickedTab = (BrowserTab) v.getTag();
+                int tabIndex = tabs.indexOf(clickedTab);
+                if (tabIndex >= 0) {
+                    switchToTab(tabIndex);
+                }
             }
         });
         
@@ -333,7 +363,11 @@ public class MainActivity extends AppCompatActivity {
             closeTab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    closeTab(index);
+                    BrowserTab clickedTab = (BrowserTab) tabView.getTag();
+                    int tabIndex = tabs.indexOf(clickedTab);
+                    if (tabIndex >= 0) {
+                        closeTab(tabIndex);
+                    }
                 }
             });
         }
@@ -347,10 +381,13 @@ public class MainActivity extends AppCompatActivity {
         newTabButton.setBackground(getDrawable(R.drawable.tab_background));
         newTabButton.setContentDescription("New Tab");
         
+        // Use dp instead of deprecated app_icon_size
+        int buttonSizePx = (int) (48 * getResources().getDisplayMetrics().density);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            getResources().getDimensionPixelSize(android.R.dimen.app_icon_size),
+            buttonSizePx,
             LinearLayout.LayoutParams.MATCH_PARENT
         );
+        params.setMargins(4, 4, 4, 4);
         newTabButton.setLayoutParams(params);
         
         newTabButton.setOnClickListener(new View.OnClickListener() {
@@ -366,31 +403,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchToTab(int index) {
-        if (index < 0 || index >= tabs.size()) return;
+        if (index < 0 || index >= tabs.size() || webViewContainer == null) return;
 
         // Hide current WebView
         if (currentTabIndex >= 0 && currentTabIndex < tabs.size()) {
-            WebView currentWebView = tabs.get(currentTabIndex).getWebView();
-            if (currentWebView.getParent() == webViewContainer) {
+            BrowserTab currentTab = tabs.get(currentTabIndex);
+            WebView currentWebView = currentTab.getWebView();
+            if (currentWebView != null && currentWebView.getParent() == webViewContainer) {
                 webViewContainer.removeView(currentWebView);
             }
-            tabs.get(currentTabIndex).setSelected(false);
+            currentTab.setSelected(false);
         }
 
         // Show new WebView
         currentTabIndex = index;
-        BrowserTab currentTab = tabs.get(currentTabIndex);
-        currentTab.setSelected(true);
-        
-        WebView webView = currentTab.getWebView();
-        if (webView.getParent() != webViewContainer) {
-            webViewContainer.addView(webView);
-        }
+        BrowserTab newCurrentTab = tabs.get(currentTabIndex);
+        if (newCurrentTab != null) {
+            newCurrentTab.setSelected(true);
+            
+            WebView webView = newCurrentTab.getWebView();
+            if (webView != null && webView.getParent() != webViewContainer) {
+                webViewContainer.addView(webView);
+            }
 
-        // Update UI
-        urlEditText.setText(currentTab.getUrl());
-        updateNavigationButtons();
-        updateTabSelection();
+            // Update UI safely
+            if (urlEditText != null) {
+                urlEditText.setText(newCurrentTab.getUrl());
+            }
+            updateNavigationButtons();
+            updateTabSelection();
+        }
     }
 
     private void closeTab(int index) {
@@ -424,24 +466,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateTabTitle(int index) {
-        if (index >= 0 && index < tabContainer.getChildCount() - 1) { // -1 for new tab button
+        if (index >= 0 && index < tabs.size() && index < tabContainer.getChildCount()) {
+            BrowserTab tab = tabs.get(index);
             View tabView = tabContainer.getChildAt(index);
-            TextView tabTitle = tabView.findViewById(R.id.tabTitle);
-            tabTitle.setText(tabs.get(index).getTitle());
+            
+            // Verify this is actually a tab view (not the new tab button)
+            if (tabView.getTag() instanceof BrowserTab) {
+                TextView tabTitle = tabView.findViewById(R.id.tabTitle);
+                if (tabTitle != null) {
+                    tabTitle.setText(tab.getTitle());
+                }
+            }
         }
     }
 
     private void updateTabSelection() {
-        for (int i = 0; i < tabs.size(); i++) {
+        for (int i = 0; i < tabs.size() && i < tabContainer.getChildCount(); i++) {
             View tabView = tabContainer.getChildAt(i);
-            TextView tabTitle = tabView.findViewById(R.id.tabTitle);
-            tabView.setSelected(i == currentTabIndex);
             
-            // Update text color based on selection state
-            if (i == currentTabIndex) {
-                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected, getTheme()));
-            } else {
-                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal, getTheme()));
+            // Verify this is actually a tab view (not the new tab button)
+            if (tabView.getTag() instanceof BrowserTab) {
+                TextView tabTitle = tabView.findViewById(R.id.tabTitle);
+                tabView.setSelected(i == currentTabIndex);
+                
+                // Update text color based on selection state
+                if (tabTitle != null) {
+                    if (i == currentTabIndex) {
+                        tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected, getTheme()));
+                    } else {
+                        tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal, getTheme()));
+                    }
+                }
             }
         }
     }
