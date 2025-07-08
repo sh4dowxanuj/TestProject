@@ -66,11 +66,12 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Architecture**: Modern Android app architecture
 
 ### Dependencies
-- **AndroidX Libraries**: AppCompat, Material Design, ConstraintLayout
-- **WebView**: Enhanced WebView with modern web standards support
-- **RecyclerView**: Efficient list management for bookmarks and history
+- **AndroidX Libraries**: AppCompat 1.7.0, Material Design 1.12.0, ConstraintLayout 2.1.4
+- **WebView**: Enhanced WebView with modern web standards support and security improvements
+- **RecyclerView**: Efficient list management for bookmarks and history (v1.3.2)
 - **Room Database**: Local data storage for bookmarks and history
 - **Material Components**: Modern UI components and theming
+- **Core Library**: AndroidX Core 1.13.1 for modern WindowInsets support
 
 ### Performance Features
 - **Memory Management**: Efficient WebView memory handling
@@ -96,6 +97,15 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Permission Updates**: Removed legacy storage permissions for API 34 compatibility
 - **Gradle Modernization**: Updated build configuration with modern syntax
 - **Release Build Support**: Proper release APK generation with signing
+
+#### 🛠️ Deprecation Fixes & Modernization (July 2025)
+- **System UI API**: Replaced deprecated `SYSTEM_UI_FLAG_*` with modern `WindowInsetsControllerCompat`
+- **Back Press Handling**: Updated from deprecated `onBackPressed()` to `OnBackPressedDispatcher`
+- **Color Resources**: Migrated from deprecated `getResources().getColor()` to `ContextCompat.getColor()`
+- **WebSettings Security**: Removed deprecated file access methods for improved security
+- **Gradle Syntax**: Fixed deprecated property assignment syntax warnings
+- **Dependencies**: Updated all AndroidX libraries to latest stable versions
+- **API Compatibility**: Maintains backward compatibility while using modern APIs
 
 #### 🏗️ Build System Improvements
 - **Gradle 8.14.1**: Latest Gradle version with improved performance
@@ -215,9 +225,14 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 🐛 Known Issues
 
-- Some deprecation warnings in Gradle build (compatibility maintained)
 - WebView memory usage optimization ongoing
 - Tab animation improvements planned
+
+**Recent Fixes Completed:**
+- ✅ All deprecation warnings resolved
+- ✅ Modern Android API migration completed
+- ✅ Build system modernization finished
+- ✅ Security improvements implemented
 
 ## 📞 Support
 

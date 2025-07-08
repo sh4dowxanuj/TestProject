@@ -1,11 +1,16 @@
 package com.example.testproject;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -57,9 +62,37 @@ public class MainActivity extends AppCompatActivity {
         initializeViews();
         initializeDatabase();
         setupEventListeners();
+        setupBackPressedHandler();
         
         // Create initial tab
         createNewTab(DEFAULT_URL);
+    }
+
+    private void setupBackPressedHandler() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Handle fullscreen video exit
+                if (isInFullscreenVideo) {
+                    WebView currentWebView = getCurrentWebView();
+                    if (currentWebView != null) {
+                        // This will trigger onHideCustomView in WebChromeClient
+                        currentWebView.evaluateJavascript("document.exitFullscreen();", null);
+                    }
+                    return;
+                }
+                
+                // Handle regular web navigation
+                WebView currentWebView = getCurrentWebView();
+                if (currentWebView != null && currentWebView.canGoBack()) {
+                    currentWebView.goBack();
+                } else {
+                    // Exit the app if we can't go back
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     @Override
@@ -71,19 +104,40 @@ public class MainActivity extends AppCompatActivity {
 
     private void enableNormalMode() {
         // Normal browsing mode with status bar visible
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsControllerCompat windowInsetsController = 
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+            if (windowInsetsController != null) {
+                windowInsetsController.show(WindowInsetsCompat.Type.statusBars());
+                windowInsetsController.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            );
+        }
     }
 
     private void enableFullscreenMode() {
         // Full immersive mode for video content
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_FULLSCREEN |
-            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsControllerCompat windowInsetsController = 
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+            if (windowInsetsController != null) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.statusBars() | 
+                    WindowInsetsCompat.Type.navigationBars());
+                windowInsetsController.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_FULLSCREEN |
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            );
+        }
     }
 
     private void initializeViews() {
@@ -229,9 +283,16 @@ public class MainActivity extends AppCompatActivity {
             
             // Enable fullscreen video support
             webSettings.setMediaPlaybackRequiresUserGesture(false);
-            webSettings.setAllowFileAccessFromFileURLs(true);
-            webSettings.setAllowUniversalAccessFromFileURLs(true);
-            webSettings.setPluginState(WebSettings.PluginState.ON);
+            // Note: setAllowFileAccessFromFileURLs and setAllowUniversalAccessFromFileURLs 
+            // are deprecated for security reasons. Only enable if absolutely necessary for your use case.
+            // Consider using a more secure approach like serving files from assets or resources
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                // These are disabled by default on API 16+ for security reasons
+                // Only enable if your app specifically needs file URL access
+                webSettings.setAllowFileAccessFromFileURLs(false);
+                webSettings.setAllowUniversalAccessFromFileURLs(false);
+            }
+            // Note: setPluginState has been deprecated as plugins are no longer supported
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
@@ -315,11 +376,22 @@ public class MainActivity extends AppCompatActivity {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
                 
                 // Make fullscreen
-                getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN |
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                );
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    WindowInsetsControllerCompat windowInsetsController = 
+                        WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+                    if (windowInsetsController != null) {
+                        windowInsetsController.hide(WindowInsetsCompat.Type.statusBars() | 
+                            WindowInsetsCompat.Type.navigationBars());
+                        windowInsetsController.setSystemBarsBehavior(
+                            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                    }
+                } else {
+                    getWindow().getDecorView().setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_FULLSCREEN |
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    );
+                }
                 
                 // Add custom view to container
                 webViewContainer.addView(customView, new FrameLayout.LayoutParams(
@@ -642,27 +714,6 @@ public class MainActivity extends AppCompatActivity {
     private WebView getCurrentWebView() {
         BrowserTab currentTab = getCurrentTab();
         return currentTab != null ? currentTab.getWebView() : null;
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Handle fullscreen video exit
-        if (isInFullscreenVideo) {
-            WebView currentWebView = getCurrentWebView();
-            if (currentWebView != null) {
-                // This will trigger onHideCustomView in WebChromeClient
-                currentWebView.evaluateJavascript("document.exitFullscreen();", null);
-            }
-            return;
-        }
-        
-        // Handle regular web navigation
-        WebView currentWebView = getCurrentWebView();
-        if (currentWebView != null && currentWebView.canGoBack()) {
-            currentWebView.goBack();
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @Override

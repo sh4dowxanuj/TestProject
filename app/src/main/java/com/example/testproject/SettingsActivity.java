@@ -3,6 +3,7 @@ package com.example.testproject;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -27,8 +28,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void setupSystemBars() {
         // Set status bar and navigation bar colors for dark theme
-        getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background));
+        getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.dark_background));
+        getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.dark_background));
     }
 
     private void setupToolbar() {

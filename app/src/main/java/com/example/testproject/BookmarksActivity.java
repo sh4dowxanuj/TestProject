@@ -2,11 +2,13 @@ package com.example.testproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,12 +39,12 @@ public class BookmarksActivity extends AppCompatActivity implements BookmarkAdap
 
     private void setupSystemBars() {
         // Set status bar and navigation bar colors for dark theme
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background, getTheme()));
-            getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background, getTheme()));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.dark_background));
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.dark_background));
         } else {
-            getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background));
-            getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background));
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.dark_background));
+            getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.dark_background));
         }
     }
 
