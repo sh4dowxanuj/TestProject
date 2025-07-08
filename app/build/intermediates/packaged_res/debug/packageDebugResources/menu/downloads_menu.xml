@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:id="@+id/action_search_downloads"
+        android:title="Search downloads"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="ifRoom" />
+    
+    <item
+        android:id="@+id/action_sort_downloads"
+        android:title="Sort by"
+        android:icon="@drawable/ic_more_vert"
+        app:showAsAction="never">
+        <menu>
+            <item
+                android:id="@+id/sort_by_date"
+                android:title="Date downloaded" />
+            <item
+                android:id="@+id/sort_by_name"
+                android:title="Name" />
+            <item
+                android:id="@+id/sort_by_size"
+                android:title="Size" />
+        </menu>
+    </item>
+    
+    <item
+        android:id="@+id/action_clear_downloads"
+        android:title="Clear all downloads"
+        android:icon="@drawable/ic_delete"
+        app:showAsAction="never" />
+        
+</menu>

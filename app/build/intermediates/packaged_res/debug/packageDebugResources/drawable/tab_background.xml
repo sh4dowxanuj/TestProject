@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Selected tab state -->
+    <item android:state_selected="true">
+        <layer-list>
+            <!-- Main background -->
+            <item>
+                <shape android:shape="rectangle">
+                    <corners 
+                        android:topLeftRadius="8dp"
+                        android:topRightRadius="8dp" />
+                    <solid android:color="@color/tab_background_selected_dark" />
+                    <stroke 
+                        android:width="1dp" 
+                        android:color="@color/dark_primary" />
+                </shape>
+            </item>
+            <!-- Bottom border for active tab -->
+            <item android:gravity="bottom">
+                <shape android:shape="rectangle">
+                    <size android:height="2dp" />
+                    <solid android:color="@color/dark_primary" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    
+    <!-- Hovered tab state -->
+    <item android:state_hovered="true">
+        <shape android:shape="rectangle">
+            <corners 
+                android:topLeftRadius="8dp"
+                android:topRightRadius="8dp" />
+            <solid android:color="@color/tab_background_hover_dark" />
+        </shape>
+    </item>
+    
+    <!-- Normal tab state -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners 
+                android:topLeftRadius="8dp"
+                android:topRightRadius="8dp" />
+            <solid android:color="@color/tab_background_dark" />
+        </shape>
+    </item>
+</selector>

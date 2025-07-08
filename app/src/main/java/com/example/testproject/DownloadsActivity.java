@@ -28,7 +28,7 @@ public class DownloadsActivity extends AppCompatActivity implements DownloadAdap
     private RecyclerView downloadsRecyclerView;
     private DownloadAdapter downloadAdapter;
     private DatabaseHelper databaseHelper;
-    private TextView emptyView;
+    private View emptyView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,10 +43,12 @@ public class DownloadsActivity extends AppCompatActivity implements DownloadAdap
 
     private void setupToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("Downloads");
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setTitle("Downloads");
+            }
         }
     }
 
@@ -54,15 +56,28 @@ public class DownloadsActivity extends AppCompatActivity implements DownloadAdap
         downloadsRecyclerView = findViewById(R.id.downloadsRecyclerView);
         emptyView = findViewById(R.id.emptyView);
         databaseHelper = new DatabaseHelper(this);
+        
+        if (downloadsRecyclerView == null) {
+            throw new RuntimeException("downloadsRecyclerView not found in layout");
+        }
+        if (emptyView == null) {
+            throw new RuntimeException("emptyView not found in layout");
+        }
     }
 
     private void setupRecyclerView() {
-        downloadsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        downloadAdapter = new DownloadAdapter(this, this);
-        downloadsRecyclerView.setAdapter(downloadAdapter);
+        if (downloadsRecyclerView != null) {
+            downloadsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            downloadAdapter = new DownloadAdapter(this, this);
+            downloadsRecyclerView.setAdapter(downloadAdapter);
+        }
     }
 
     private void loadDownloads() {
+        if (databaseHelper == null || downloadAdapter == null || emptyView == null || downloadsRecyclerView == null) {
+            return;
+        }
+        
         List<DownloadItem> downloads = databaseHelper.getAllDownloads();
         downloadAdapter.setDownloads(downloads);
         
