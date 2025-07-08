@@ -8,14 +8,6 @@
 .cxx
 output.json
 
-# APK files - keep built APKs in repository
-# Allow APKs in apk/ directory and root directory
-!apk/*.apk
-!*.apk
-!/debug_browser.apk
-!/release_browser.apk
-!/browser.apk
-
 # Large files that exceed GitHub limits
 cmdline-tools.zip
 TestProject.zip
