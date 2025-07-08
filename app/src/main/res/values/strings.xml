@@ -12,5 +12,8 @@
     <string name="no_app_to_open_file">No app found to open this file</string>
     <string name="storage_permission_granted">Storage permission granted. Try downloading again.</string>
     <string name="storage_permission_denied">Storage permission denied. Cannot download files.</string>
+    <string name="storage_permissions_granted">Storage permissions granted. You can now download files.</string>
+    <string name="storage_permissions_denied">Storage permissions denied. Downloads may not work properly.</string>
+    <string name="manage_storage_permission_needed">Please grant \'All files access\' permission for downloads</string>
     <string name="download_not_completed">Download not completed</string>
 </resources>

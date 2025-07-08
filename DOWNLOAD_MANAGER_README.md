@@ -114,9 +114,18 @@ app/src/main/res/
 ## Security Considerations
 
 ### Permissions
-- **Storage Access**: Properly scoped for download directory
+- **Storage Access**: Comprehensive storage permissions for all Android versions
+- **Android 11+ (API 30+)**: Uses MANAGE_EXTERNAL_STORAGE for broad file access
+- **Android 6-10 (API 23-29)**: Uses WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE
+- **Below Android 6**: Permissions granted at install time
 - **Network Access**: Internet permission for downloading
 - **Receiver Export**: Secure broadcast receiver registration
+
+### Enhanced Permission Handling
+- **Adaptive Permissions**: Different permission strategies based on Android version
+- **Settings Integration**: Directs users to system settings for MANAGE_EXTERNAL_STORAGE on Android 11+
+- **Graceful Fallback**: Falls back to standard permissions if special permissions fail
+- **User Guidance**: Clear messaging about required permissions
 
 ### File Safety
 - **Download Directory**: Uses public Downloads folder
