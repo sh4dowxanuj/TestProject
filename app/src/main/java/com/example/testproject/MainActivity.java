@@ -32,7 +32,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.DownloadListener;
-import android.provider.Settings;
 
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -884,13 +883,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateUrlBarHint();
-        
-        // Check if permissions were granted from settings (for Android 11+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (Environment.isExternalStorageManager()) {
-                // Permission was granted, you can inform the user or update UI
-            }
-        }
     }
 
     private void handleSearchTextChange(String query) {
@@ -948,52 +940,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleDownload(String url, String userAgent, String contentDisposition, String mimeType) {
-        // Check permissions based on Android version
-        if (!hasStoragePermissions()) {
-            requestStoragePermissions();
-            return;
+        // For Android 10+ (API 29+), we use scoped storage - no special permissions needed
+        // For Android 6-9 (API 23-28), we check for legacy storage permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Android 10+ - scoped storage, no permission needed for Downloads folder
+            startDownload(url, userAgent, contentDisposition, mimeType);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Android 6-9 - check legacy storage permission
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // Request legacy storage permission
+                ActivityCompat.requestPermissions(this, 
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
+                    PERMISSION_REQUEST_STORAGE);
+                return;
+            }
+            startDownload(url, userAgent, contentDisposition, mimeType);
+        } else {
+            // Below Android 6 - permissions granted at install time
+            startDownload(url, userAgent, contentDisposition, mimeType);
         }
-        
-        // Start download
+    }
+
+    private void startDownload(String url, String userAgent, String contentDisposition, String mimeType) {
         long downloadId = downloadManagerHelper.startDownload(url, userAgent, contentDisposition, mimeType);
         Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show();
-    }
-
-    private boolean hasStoragePermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11 (API 30) and above
-            return Environment.isExternalStorageManager();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android 6.0 (API 23) to Android 10 (API 29)
-            return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            // Below Android 6.0, permissions are granted at install time
-            return true;
-        }
-    }
-
-    private void requestStoragePermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // Android 11 and above - request MANAGE_EXTERNAL_STORAGE
-            try {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                startActivity(intent);
-                Toast.makeText(this, "Please grant 'All files access' permission for downloads", Toast.LENGTH_LONG).show();
-            } catch (Exception e) {
-                // Fallback to regular permission request
-                ActivityCompat.requestPermissions(this, 
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 
-                    PERMISSION_REQUEST_STORAGE);
-            }
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android 6.0 to 10 - request standard storage permissions
-            ActivityCompat.requestPermissions(this, 
-                new String[]{
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                }, 
-                PERMISSION_REQUEST_STORAGE);
-        }
     }
 
     @Override
@@ -1001,18 +971,10 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         
         if (requestCode == PERMISSION_REQUEST_STORAGE) {
-            boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-            
-            if (allGranted) {
-                Toast.makeText(this, "Storage permissions granted. You can now download files.", Toast.LENGTH_SHORT).show();
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Storage permission granted. You can now download files.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Storage permissions denied. Downloads may not work properly.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Storage permission denied. Downloads may not work on this Android version.", Toast.LENGTH_LONG).show();
             }
         }
     }

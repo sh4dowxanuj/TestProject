@@ -50,23 +50,20 @@ public class DownloadManagerHelper {
     public long startDownload(String url, String userAgent, String contentDisposition, String mimeType) {
         String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
         
-        // Create download directory if it doesn't exist
-        File downloadDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "Browser");
-        if (!downloadDir.exists()) {
-            downloadDir.mkdirs();
-        }
-
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setTitle(fileName);
         request.setDescription("Downloading file...");
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS + "/Browser", fileName);
+        
+        // Use standard Downloads directory like Chrome - no special permissions needed on Android 10+
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
         request.addRequestHeader("User-Agent", userAgent);
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
 
         long downloadId = downloadManager.enqueue(request);
 
         // Create download item and save to database
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         String filePath = downloadDir.getAbsolutePath() + "/" + fileName;
         DownloadItem downloadItem = new DownloadItem(fileName, url, fileName, filePath, 0, mimeType);
         downloadItem.setId(downloadId);

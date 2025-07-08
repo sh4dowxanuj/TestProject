@@ -113,19 +113,19 @@ app/src/main/res/
 
 ## Security Considerations
 
-### Permissions
-- **Storage Access**: Comprehensive storage permissions for all Android versions
-- **Android 11+ (API 30+)**: Uses MANAGE_EXTERNAL_STORAGE for broad file access
-- **Android 6-10 (API 23-29)**: Uses WRITE_EXTERNAL_STORAGE and READ_EXTERNAL_STORAGE
+### Permissions (Chrome-like Approach)
+- **Storage Access**: Uses Android's scoped storage model like Chrome
+- **Android 10+ (API 29+)**: No special permissions needed - uses DownloadManager with public Downloads folder
+- **Android 6-9 (API 23-28)**: Uses WRITE_EXTERNAL_STORAGE for legacy compatibility
 - **Below Android 6**: Permissions granted at install time
 - **Network Access**: Internet permission for downloading
 - **Receiver Export**: Secure broadcast receiver registration
 
-### Enhanced Permission Handling
-- **Adaptive Permissions**: Different permission strategies based on Android version
-- **Settings Integration**: Directs users to system settings for MANAGE_EXTERNAL_STORAGE on Android 11+
-- **Graceful Fallback**: Falls back to standard permissions if special permissions fail
-- **User Guidance**: Clear messaging about required permissions
+### Chrome-like Storage Model
+- **Scoped Storage**: Downloads stored in public Downloads folder without special permissions
+- **No File Manager Access**: Doesn't request broad file system access like MANAGE_EXTERNAL_STORAGE
+- **Standard Downloads Location**: Files saved to standard Downloads directory
+- **User-Friendly**: No confusing "All files access" permission requests
 
 ### File Safety
 - **Download Directory**: Uses public Downloads folder
@@ -137,12 +137,17 @@ app/src/main/res/
 ### Supported Android Versions
 - **Minimum**: Android 6.0 (API 23)
 - **Target**: Android 14 (API 34)
-- **Permissions**: Adaptive permissions based on Android version
+- **Permissions**: Chrome-like scoped storage approach
 
 ### File Handling
-- **Storage**: External storage (Downloads folder)
-- **Organization**: Browser subfolder for organization
+- **Storage**: Public Downloads folder (no special permissions needed on Android 10+)
+- **Organization**: Standard Downloads directory like Chrome
 - **File Types**: All downloadable content types supported
+
+### Permission Strategy by Android Version
+- **Android 10+ (API 29+)**: Scoped storage - no permission dialogs needed
+- **Android 6-9 (API 23-28)**: Legacy storage permission for compatibility
+- **Below Android 6**: Automatic permission grant at install
 
 ### Database Schema
 ```sql
