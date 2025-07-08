@@ -32,6 +32,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.DownloadListener;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
 
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -443,6 +445,9 @@ public class MainActivity extends AppCompatActivity {
                     handleDownload(url, userAgent, contentDisposition, mimeType);
                 }
             });
+            
+            // Register for context menu (for image download)
+            registerForContextMenu(webView);
             
             // Note: setAllowFileAccessFromFileURLs and setAllowUniversalAccessFromFileURLs 
             // are deprecated for security reasons. Only enable if absolutely necessary for your use case.
@@ -901,6 +906,11 @@ public class MainActivity extends AppCompatActivity {
         if (chromeDownloader != null) {
             chromeDownloader.cleanup();
         }
+        
+        // Clear any remaining notifications
+        if (downloadNotificationManager != null) {
+            downloadNotificationManager.clearAllNotifications();
+        }
     }
     
     // Helper method to safely get tab count for UI operations
@@ -1098,5 +1108,100 @@ public class MainActivity extends AppCompatActivity {
         }
         
         return String.format("%.1f %s", size, units[unitIndex]);
+    }
+    
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        
+        if (v instanceof WebView) {
+            WebView webView = (WebView) v;
+            WebView.HitTestResult hitTestResult = webView.getHitTestResult();
+            
+            if (hitTestResult != null) {
+                int type = hitTestResult.getType();
+                String extra = hitTestResult.getExtra();
+                
+                if (type == WebView.HitTestResult.IMAGE_TYPE || 
+                    type == WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE) {
+                    
+                    MenuInflater inflater = getMenuInflater();
+                    inflater.inflate(R.menu.context_menu_image, menu);
+                    menu.setHeaderTitle("Image Options");
+                    
+                    // Store the image URL for later use
+                    menu.findItem(R.id.context_download_image).setActionView(new View(this));
+                    menu.findItem(R.id.context_download_image).getActionView().setTag(extra);
+                }
+            }
+        }
+    }
+    
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.context_download_image) {
+            View actionView = item.getActionView();
+            if (actionView != null) {
+                String imageUrl = (String) actionView.getTag();
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    handleImageDownload(imageUrl);
+                    return true;
+                }
+            }
+        }
+        return super.onContextItemSelected(item);
+    }
+    
+    private void handleImageDownload(String imageUrl) {
+        // Check and request storage permissions if needed
+        if (!hasStoragePermission()) {
+            requestStoragePermission();
+            Toast.makeText(this, "Storage permission required for downloads", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Validate URL
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            Toast.makeText(this, "Invalid image URL", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Extract filename from URL
+        String fileName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+        if (fileName.isEmpty() || !fileName.contains(".")) {
+            // Generate a filename based on current time
+            fileName = "image_" + System.currentTimeMillis() + ".jpg";
+        }
+        
+        // Clean up filename (remove query parameters)
+        if (fileName.contains("?")) {
+            String baseFileName = fileName.substring(0, fileName.indexOf("?"));
+            String extension = "";
+            if (baseFileName.contains(".")) {
+                extension = baseFileName.substring(baseFileName.lastIndexOf("."));
+            } else {
+                extension = ".jpg"; // default extension
+            }
+            fileName = baseFileName.substring(0, baseFileName.lastIndexOf(".")) + extension;
+        }
+        
+        // Determine MIME type based on file extension
+        String mimeType = "image/jpeg"; // default
+        String lowerFileName = fileName.toLowerCase();
+        if (lowerFileName.endsWith(".png")) {
+            mimeType = "image/png";
+        } else if (lowerFileName.endsWith(".gif")) {
+            mimeType = "image/gif";
+        } else if (lowerFileName.endsWith(".webp")) {
+            mimeType = "image/webp";
+        } else if (lowerFileName.endsWith(".bmp")) {
+            mimeType = "image/bmp";
+        } else if (lowerFileName.endsWith(".svg")) {
+            mimeType = "image/svg+xml";
+        }
+        
+        // Start download using ChromeStyleDownloader
+        chromeDownloader.startDownload(imageUrl, null, "attachment; filename=\"" + fileName + "\"", mimeType);
+        Toast.makeText(this, "Downloading image: " + fileName, Toast.LENGTH_SHORT).show();
     }
 }

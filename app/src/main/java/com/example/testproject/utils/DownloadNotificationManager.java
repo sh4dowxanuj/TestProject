@@ -52,6 +52,7 @@ public class DownloadNotificationManager {
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setAutoCancel(false)
+            .setOnlyAlertOnce(true)  // Only alert once to avoid spam
             .setPriority(NotificationCompat.PRIORITY_LOW);
 
         if (item.getFileSize() > 0) {
@@ -68,6 +69,9 @@ public class DownloadNotificationManager {
     }
 
     public void showDownloadCompleted(DownloadItem item) {
+        // First cancel the ongoing progress notification
+        cancelNotification(item.getId());
+        
         Intent intent = new Intent(context, DownloadsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
             context, 0, intent,
@@ -80,12 +84,16 @@ public class DownloadNotificationManager {
             .setContentText(item.getTitle())
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setOngoing(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         notificationManager.notify((int) item.getId(), builder.build());
     }
 
     public void showDownloadFailed(DownloadItem item, String error) {
+        // First cancel the ongoing progress notification
+        cancelNotification(item.getId());
+        
         Intent intent = new Intent(context, DownloadsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
             context, 0, intent,
@@ -98,6 +106,7 @@ public class DownloadNotificationManager {
             .setContentText(item.getTitle())
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
+            .setOngoing(false)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         notificationManager.notify((int) item.getId(), builder.build());
@@ -105,6 +114,16 @@ public class DownloadNotificationManager {
 
     public void cancelNotification(long downloadId) {
         notificationManager.cancel((int) downloadId);
+    }
+
+    public void clearAllNotifications() {
+        notificationManager.cancelAll();
+    }
+    
+    public void clearCompletedNotifications() {
+        // This method can be called periodically to clean up completed notifications
+        // For now, we'll just cancel all notifications that might be stuck
+        notificationManager.cancelAll();
     }
 
     private String formatFileSize(long bytes) {

@@ -40,7 +40,7 @@
                 android:layout_height="72dp"
                 android:layout_marginBottom="16dp"
                 android:src="@drawable/ic_download"
-                android:tint="@color/text_secondary_dark" />
+                app:tint="@color/text_secondary_dark" />
 
             <TextView
                 android:layout_width="wrap_content"

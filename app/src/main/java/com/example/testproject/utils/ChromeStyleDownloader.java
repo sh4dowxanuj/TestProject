@@ -107,6 +107,13 @@ public class ChromeStyleDownloader {
         }
         databaseHelper.deleteDownloadItem(downloadId);
     }
+    
+    public void cancelAllDownloads() {
+        for (DownloadTask task : activeDownloads.values()) {
+            task.cancel();
+        }
+        activeDownloads.clear();
+    }
 
     public boolean isDownloading(long downloadId) {
         return activeDownloads.containsKey(downloadId);
