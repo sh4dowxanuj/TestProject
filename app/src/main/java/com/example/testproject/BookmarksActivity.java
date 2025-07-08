@@ -37,8 +37,13 @@ public class BookmarksActivity extends AppCompatActivity implements BookmarkAdap
 
     private void setupSystemBars() {
         // Set status bar and navigation bar colors for dark theme
-        getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background, getTheme()));
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background, getTheme()));
+            getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background, getTheme()));
+        } else {
+            getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background));
+            getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background));
+        }
     }
 
     private void setupToolbar() {

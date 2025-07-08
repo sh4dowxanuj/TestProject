@@ -9,13 +9,13 @@
     <color name="accent_orange_dark">#F57C00</color>
     
     <!-- Dark Theme Colors -->
-    <color name="dark_background">#121212</color>
-    <color name="dark_surface">#1E1E1E</color>
-    <color name="dark_surface_variant">#2D2D2D</color>
-    <color name="dark_on_background">#E0E0E0</color>
-    <color name="dark_on_surface">#E0E0E0</color>
-    <color name="dark_primary">#64B5F6</color>
-    <color name="dark_primary_variant">#42A5F5</color>
+    <color name="dark_background">#202124</color>
+    <color name="dark_surface">#292A2D</color>
+    <color name="dark_surface_variant">#35363A</color>
+    <color name="dark_on_background">#E8EAED</color>
+    <color name="dark_on_surface">#E8EAED</color>
+    <color name="dark_primary">#8AB4F8</color>
+    <color name="dark_primary_variant">#5F9BF7</color>
     <color name="dark_secondary">#FFB74D</color>
     <color name="dark_accent">#FF8A65</color>
     
@@ -40,10 +40,13 @@
     <color name="tab_text_selected">#FFFFFF</color>
     
     <!-- Dark Theme Tab colors -->
-    <color name="tab_background_dark">#2D2D2D</color>
-    <color name="tab_background_selected_dark">#64B5F6</color>
-    <color name="tab_text_normal_dark">#E0E0E0</color>
-    <color name="tab_text_selected_dark">#121212</color>
+    <color name="tab_background_dark">#292A2D</color>
+    <color name="tab_background_selected_dark">#35363A</color>
+    <color name="tab_background_hover_dark">#313235</color>
+    <color name="tab_text_normal_dark">#E8EAED</color>
+    <color name="tab_text_selected_dark">#E8EAED</color>
+    <color name="tab_close_button_dark">#9AA0A6</color>
+    <color name="tab_close_button_hover_dark">#FFFFFF</color>
     
     <!-- Light Theme URL bar colors -->
     <color name="url_bar_background">#FFFFFF</color>

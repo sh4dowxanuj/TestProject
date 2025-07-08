@@ -9,7 +9,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:8.7.3'
     }
 }
 
@@ -21,6 +21,20 @@ allprojects {
     
     // Set build directory for all subprojects
     buildDir = "/tmp/gradle-builds/TestProject/${project.name}"
+}
+
+// Configure Java 17 toolchain for all projects
+subprojects {
+    afterEvaluate { project ->
+        if (project.hasProperty('android')) {
+            android {
+                compileOptions {
+                    sourceCompatibility JavaVersion.VERSION_17
+                    targetCompatibility JavaVersion.VERSION_17
+                }
+            }
+        }
+    }
 }
 
 // Custom task to build APKs and copy to project directory

@@ -38,7 +38,7 @@
             android:layout_height="64dp"
             android:alpha="0.5"
             android:src="@drawable/ic_bookmark_border"
-            android:tint="@color/text_secondary_dark" />
+            app:tint="@color/text_secondary_dark" />
 
         <TextView
             android:layout_width="wrap_content"

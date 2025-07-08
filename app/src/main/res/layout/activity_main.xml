@@ -10,10 +10,12 @@
     <HorizontalScrollView
         android:id="@+id/tabScrollView"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@color/dark_surface"
+        android:layout_height="40dp"
+        android:background="@color/dark_background"
         android:scrollbars="none"
         android:fitsSystemWindows="true"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -24,8 +26,25 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:paddingStart="8dp"
-            android:paddingEnd="8dp" />
+            android:paddingEnd="56dp"
+            android:paddingTop="4dp"
+            android:clipToPadding="false" />
     </HorizontalScrollView>
+
+    <!-- Add New Tab Button -->
+    <ImageButton
+        android:id="@+id/newTabButton"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="12dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="New Tab"
+        android:scaleType="center"
+        android:src="@drawable/ic_add"
+        app:tint="@color/tab_text_normal_dark"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tabScrollView"
+        app:layout_constraintBottom_toBottomOf="@id/tabScrollView" />
 
     <!-- URL and Navigation Bar -->
     <LinearLayout
@@ -40,7 +59,7 @@
         android:paddingEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tabScrollView">
+        app:layout_constraintTop_toBottomOf="@id/newTabButton">
 
         <!-- Back Button -->
         <ImageButton

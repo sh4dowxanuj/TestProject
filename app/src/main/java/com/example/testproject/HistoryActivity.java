@@ -38,8 +38,8 @@ public class HistoryActivity extends AppCompatActivity implements HistoryAdapter
 
     private void setupSystemBars() {
         // Set status bar and navigation bar colors for dark theme
-        getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background, getTheme()));
-        getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background, getTheme()));
+        getWindow().setStatusBarColor(getResources().getColor(R.color.dark_background));
+        getWindow().setNavigationBarColor(getResources().getColor(R.color.dark_background));
     }
 
     private void setupToolbar() {

@@ -4,14 +4,27 @@
     android:layout_height="match_parent"
     android:background="@drawable/tab_background"
     android:gravity="center_vertical"
-    android:minWidth="120dp"
-    android:maxWidth="200dp"
+    android:minWidth="180dp"
+    android:maxWidth="240dp"
     android:orientation="horizontal"
-    android:paddingStart="12dp"
+    android:paddingStart="16dp"
     android:paddingEnd="8dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp"
-    android:layout_marginEnd="2dp">
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
+    android:layout_marginEnd="1dp"
+    android:elevation="1dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Favicon placeholder (for future enhancement) -->
+    <ImageView
+        android:id="@+id/tabFavicon"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:contentDescription="Site icon" />
 
     <TextView
         android:id="@+id/tabTitle"
@@ -23,16 +36,21 @@
         android:text="New Tab"
         android:textColor="@color/tab_text_normal_dark"
         android:textSize="13sp"
-        android:fontFamily="sans-serif-medium" />
+        android:fontFamily="sans-serif"
+        android:lineSpacingExtra="0dp"
+        android:includeFontPadding="false" />
 
     <ImageButton
         android:id="@+id/closeTab"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginStart="8dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
+        android:background="@drawable/tab_close_background"
         android:contentDescription="Close Tab"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_close" />
+        android:scaleType="center"
+        android:src="@drawable/ic_tab_close_selector"
+        android:padding="4dp"
+        android:clickable="true"
+        android:focusable="true" />
 
 </LinearLayout>

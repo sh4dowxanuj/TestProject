@@ -1,6 +1,7 @@
 package com.example.testproject;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
 
 import android.content.Intent;
@@ -345,7 +346,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private View createTabView(BrowserTab tab, int index) {
-        View tabView = LayoutInflater.from(this).inflate(R.layout.tab_item, null);
+        View tabView = LayoutInflater.from(this).inflate(R.layout.tab_item, tabContainer, false);
         TextView tabTitle = tabView.findViewById(R.id.tabTitle);
         ImageButton closeTab = tabView.findViewById(R.id.closeTab);
 
@@ -386,7 +387,7 @@ public class MainActivity extends AppCompatActivity {
     private void addNewTabButton() {
         ImageButton newTabButton = new ImageButton(this);
         newTabButton.setImageResource(R.drawable.ic_add);
-        newTabButton.setBackground(getDrawable(R.drawable.tab_background));
+        newTabButton.setBackground(AppCompatResources.getDrawable(this, R.drawable.tab_background));
         newTabButton.setContentDescription("New Tab");
         
         // Use dp instead of deprecated app_icon_size
@@ -500,9 +501,17 @@ public class MainActivity extends AppCompatActivity {
                 // Update text color based on selection state
                 if (tabTitle != null) {
                     if (i == currentTabIndex) {
-                        tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected, getTheme()));
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected, getTheme()));
+                        } else {
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected));
+                        }
                     } else {
-                        tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal, getTheme()));
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal, getTheme()));
+                        } else {
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal));
+                        }
                     }
                 }
             }
