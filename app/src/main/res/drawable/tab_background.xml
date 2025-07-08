@@ -3,20 +3,23 @@
     <!-- Selected tab state -->
     <item android:state_selected="true">
         <layer-list>
+            <!-- Main background -->
+            <item>
+                <shape android:shape="rectangle">
+                    <corners 
+                        android:topLeftRadius="8dp"
+                        android:topRightRadius="8dp" />
+                    <solid android:color="@color/tab_background_selected_dark" />
+                    <stroke 
+                        android:width="1dp" 
+                        android:color="@color/dark_primary" />
+                </shape>
+            </item>
             <!-- Bottom border for active tab -->
-            <item android:bottom="0dp">
+            <item android:gravity="bottom">
                 <shape android:shape="rectangle">
                     <size android:height="2dp" />
                     <solid android:color="@color/dark_primary" />
-                </shape>
-            </item>
-            <!-- Main background -->
-            <item android:bottom="2dp">
-                <shape android:shape="rectangle">
-                    <corners 
-                        android:topLeftRadius="12dp"
-                        android:topRightRadius="12dp" />
-                    <solid android:color="@color/tab_background_selected_dark" />
                 </shape>
             </item>
         </layer-list>
@@ -26,8 +29,8 @@
     <item android:state_hovered="true">
         <shape android:shape="rectangle">
             <corners 
-                android:topLeftRadius="12dp"
-                android:topRightRadius="12dp" />
+                android:topLeftRadius="8dp"
+                android:topRightRadius="8dp" />
             <solid android:color="@color/tab_background_hover_dark" />
         </shape>
     </item>
@@ -36,8 +39,8 @@
     <item>
         <shape android:shape="rectangle">
             <corners 
-                android:topLeftRadius="12dp"
-                android:topRightRadius="12dp" />
+                android:topLeftRadius="8dp"
+                android:topRightRadius="8dp" />
             <solid android:color="@color/tab_background_dark" />
         </shape>
     </item>

@@ -106,6 +106,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupEventListeners() {
+        // New tab button  
+        ImageButton newTabButton = findViewById(R.id.newTabButton);
+        if (newTabButton != null) {
+            newTabButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    createNewTab(DEFAULT_URL);
+                }
+            });
+        }
+        
         // URL EditText
         urlEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -181,13 +192,15 @@ public class MainActivity extends AppCompatActivity {
                 tabContainer.addView(tabView);
             }
 
-            // Add new tab button if this is the first tab
-            if (tabs.size() == 1) {
-                addNewTabButton();
-            }
+            // Add new tab button if this is the first tab or it doesn't exist
+            addNewTabButton();
 
             // Switch to new tab
             switchToTab(tabs.size() - 1);
+            
+            // Sync tab container and scroll to show the new tab
+            syncTabContainer();
+            scrollToActiveTab();
             
             // Load URL safely
             if (webView != null && url != null && !url.isEmpty()) {
@@ -385,29 +398,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addNewTabButton() {
-        ImageButton newTabButton = new ImageButton(this);
-        newTabButton.setImageResource(R.drawable.ic_add);
-        newTabButton.setBackground(AppCompatResources.getDrawable(this, R.drawable.tab_background));
-        newTabButton.setContentDescription("New Tab");
-        
-        // Use dp instead of deprecated app_icon_size
-        int buttonSizePx = (int) (48 * getResources().getDisplayMetrics().density);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-            buttonSizePx,
-            LinearLayout.LayoutParams.MATCH_PARENT
-        );
-        params.setMargins(4, 4, 4, 4);
-        newTabButton.setLayoutParams(params);
-        
-        newTabButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createNewTab(DEFAULT_URL);
-            }
-        });
-        
-        if (tabContainer != null) {
-            tabContainer.addView(newTabButton);
+        ImageButton newTabButton = findViewById(R.id.newTabButton);
+        if (newTabButton != null) {
+            newTabButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    createNewTab(DEFAULT_URL);
+                }
+            });
         }
     }
 
@@ -441,6 +439,7 @@ public class MainActivity extends AppCompatActivity {
             }
             updateNavigationButtons();
             updateTabSelection();
+            scrollToActiveTab();
         }
     }
 
@@ -472,6 +471,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (currentTabIndex > index) {
             currentTabIndex--;
         }
+        
+        // Update tab selection after closing
+        updateTabSelection();
     }
 
     private void updateTabTitle(int index) {
@@ -502,18 +504,29 @@ public class MainActivity extends AppCompatActivity {
                 if (tabTitle != null) {
                     if (i == currentTabIndex) {
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected, getTheme()));
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected_dark, getTheme()));
                         } else {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected));
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected_dark));
                         }
                     } else {
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal, getTheme()));
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark, getTheme()));
                         } else {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal));
+                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark));
                         }
                     }
                 }
+            }
+        }
+    }
+    
+    private void scrollToActiveTab() {
+        if (currentTabIndex >= 0 && currentTabIndex < tabContainer.getChildCount()) {
+            View activeTab = tabContainer.getChildAt(currentTabIndex);
+            if (activeTab != null && tabScrollView != null) {
+                // Calculate the position to scroll to center the active tab
+                int scrollTo = activeTab.getLeft() - (tabScrollView.getWidth() / 2) + (activeTab.getWidth() / 2);
+                tabScrollView.smoothScrollTo(Math.max(0, scrollTo), 0);
             }
         }
     }
@@ -660,5 +673,31 @@ public class MainActivity extends AppCompatActivity {
                 tab.getWebView().destroy();
             }
         }
+    }
+    
+    // Helper method to safely get tab count for UI operations
+    private int getTabCount() {
+        return tabs != null ? tabs.size() : 0;
+    }
+    
+    // Helper method to ensure tab container is in sync with tab list
+    private void syncTabContainer() {
+        if (tabContainer == null || tabs == null) return;
+        
+        // Remove extra views that might exist
+        while (tabContainer.getChildCount() > tabs.size()) {
+            View extraView = tabContainer.getChildAt(tabContainer.getChildCount() - 1);
+            if (!(extraView.getTag() instanceof BrowserTab)) {
+                tabContainer.removeViewAt(tabContainer.getChildCount() - 1);
+            } else {
+                break;
+            }
+        }
+        
+        // Update tab selection and ensure correct index
+        if (currentTabIndex >= tabs.size()) {
+            currentTabIndex = Math.max(0, tabs.size() - 1);
+        }
+        updateTabSelection();
     }
 }
