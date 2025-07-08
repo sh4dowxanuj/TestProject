@@ -41,14 +41,35 @@ android {
         variant.outputs.all { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                def fileName = "browser.apk"
+                def buildType = variant.buildType.name
+                def fileName = "${buildType}_browser.apk"
                 outputFileName = fileName
-                // Copy APK to project root after build
+                
+                // Copy APK to multiple locations after build
                 variant.assembleProvider.get().doLast {
+                    // Copy to apk directory (existing)
                     copy {
                         from outputFile.parent
                         into "${rootProject.projectDir}/apk"
                         include fileName
+                        rename fileName, "browser.apk"
+                    }
+                    
+                    // Copy to root directory with build type name
+                    copy {
+                        from outputFile.parent
+                        into "${rootProject.projectDir}"
+                        include fileName
+                    }
+                    
+                    // Copy latest debug build as browser.apk in root
+                    if (buildType == "debug") {
+                        copy {
+                            from outputFile.parent
+                            into "${rootProject.projectDir}"
+                            include fileName
+                            rename fileName, "browser.apk"
+                        }
                     }
                 }
             }

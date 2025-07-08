@@ -2,6 +2,30 @@
 
 An Android application template with API level 22 minimum support.
 
+## 📱 Ready-to-Install APK Files
+
+The repository includes pre-built APK files for immediate installation:
+
+### APK Files Available:
+- **`browser.apk`** - Latest debug build (recommended for testing)
+- **`debug_browser.apk`** - Debug build with debugging enabled
+- **`release_browser.apk`** - Optimized release build
+- **`apk/browser.apk`** - Copy in apk directory
+
+### Installation:
+```bash
+# Install via ADB
+adb install browser.apk
+
+# Or install any specific build
+adb install debug_browser.apk
+adb install release_browser.apk
+```
+
+### APK Sizes:
+- Debug builds: ~5.5MB
+- Release builds: ~4.5MB
+
 ## Project Structure
 
 This is a standard Android project created with:

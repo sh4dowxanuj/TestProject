@@ -6,9 +6,20 @@
 /captures
 .externalNativeBuild
 .cxx
-*.apk
-!apk/*.apk
 output.json
+
+# APK files - keep built APKs in repository
+# Allow APKs in apk/ directory and root directory
+!apk/*.apk
+!*.apk
+!/debug_browser.apk
+!/release_browser.apk
+!/browser.apk
+
+# Large files that exceed GitHub limits
+cmdline-tools.zip
+TestProject.zip
+bin/
 
 # External build directories (configured in build.gradle)
 # Build artifacts are now stored in /tmp/gradle-builds/TestProject/
