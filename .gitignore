@@ -7,14 +7,8 @@
 .externalNativeBuild
 .cxx
 *.apk
-*.zip
+!apk/*.apk
 output.json
-
-# Large files and build artifacts
-cmdline-tools.zip
-TestProject.zip
-bin/
-apk/
 
 # External build directories (configured in build.gradle)
 # Build artifacts are now stored in /tmp/gradle-builds/TestProject/
