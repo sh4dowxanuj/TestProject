@@ -109,26 +109,22 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.Downlo
             SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault());
             timestampTextView.setText(sdf.format(new Date(download.getTimestamp())));
 
+            // Set file type icon
+            statusIcon.setImageResource(getFileTypeIcon(download));
+            
             // Set progress and status
             if (download.getStatus() == DownloadItem.STATUS_DOWNLOADING) {
                 progressBar.setVisibility(View.VISIBLE);
                 progressBar.setProgress(download.getProgress());
-                statusIcon.setImageResource(R.drawable.ic_download);
+                // Add a small overlay or change tint for downloading status
+                statusIcon.setAlpha(0.6f);
             } else {
                 progressBar.setVisibility(View.GONE);
-                switch (download.getStatus()) {
-                    case DownloadItem.STATUS_COMPLETED:
-                        statusIcon.setImageResource(android.R.drawable.stat_sys_download_done);
-                        break;
-                    case DownloadItem.STATUS_FAILED:
-                        statusIcon.setImageResource(android.R.drawable.stat_notify_error);
-                        break;
-                    case DownloadItem.STATUS_PAUSED:
-                        statusIcon.setImageResource(android.R.drawable.ic_media_pause);
-                        break;
-                    default:
-                        statusIcon.setImageResource(R.drawable.ic_download);
-                        break;
+                statusIcon.setAlpha(1.0f);
+                
+                // For media files, you could add a play button overlay here
+                if (isMediaFile(download) && download.getStatus() == DownloadItem.STATUS_COMPLETED) {
+                    // Media files could have a subtle play indicator
                 }
             }
         }
@@ -146,6 +142,65 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.Downlo
             }
             
             return String.format(Locale.getDefault(), "%.1f %s", size, units[unitIndex]);
+        }
+
+        private int getFileTypeIcon(DownloadItem download) {
+            String mimeType = download.getMimeType();
+            String fileName = download.getFileName();
+            
+            if (mimeType != null) {
+                if (mimeType.startsWith("image/")) {
+                    return R.drawable.ic_file_image;
+                } else if (mimeType.startsWith("video/")) {
+                    return R.drawable.ic_file_video;
+                } else if (mimeType.startsWith("audio/")) {
+                    return R.drawable.ic_file_audio;
+                } else if (mimeType.equals("application/pdf") || 
+                          mimeType.contains("document") || 
+                          mimeType.contains("text")) {
+                    return R.drawable.ic_file_document;
+                } else if (mimeType.contains("zip") || 
+                          mimeType.contains("rar") || 
+                          mimeType.contains("archive")) {
+                    return R.drawable.ic_file_archive;
+                }
+            } else if (fileName != null) {
+                // Determine by file extension if MIME type is not available
+                String extension = getFileExtension(fileName).toLowerCase();
+                switch (extension) {
+                    case "jpg": case "jpeg": case "png": case "gif": case "bmp": case "webp":
+                        return R.drawable.ic_file_image;
+                    case "mp4": case "avi": case "mkv": case "mov": case "wmv": case "webm":
+                        return R.drawable.ic_file_video;
+                    case "mp3": case "wav": case "flac": case "aac": case "ogg":
+                        return R.drawable.ic_file_audio;
+                    case "pdf": case "doc": case "docx": case "txt":
+                        return R.drawable.ic_file_document;
+                    case "zip": case "rar": case "7z": case "tar":
+                        return R.drawable.ic_file_archive;
+                }
+            }
+            
+            return R.drawable.ic_file_document; // Default icon
+        }
+        
+        private String getFileExtension(String fileName) {
+            int lastDot = fileName.lastIndexOf('.');
+            return (lastDot != -1) ? fileName.substring(lastDot + 1) : "";
+        }
+        
+        private boolean isMediaFile(DownloadItem download) {
+            String mimeType = download.getMimeType();
+            String fileName = download.getFileName();
+            
+            if (mimeType != null) {
+                return mimeType.startsWith("video/") || mimeType.startsWith("audio/");
+            } else if (fileName != null) {
+                String extension = getFileExtension(fileName).toLowerCase();
+                return extension.matches("mp4|avi|mkv|mov|wmv|webm|mp3|wav|flac|aac|ogg");
+            }
+            
+            return false;
         }
     }
 }

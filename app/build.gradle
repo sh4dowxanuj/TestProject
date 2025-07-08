@@ -12,8 +12,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -50,37 +48,6 @@ android {
             manifest.srcFile 'src/main/AndroidManifest.xml'
         }
     }
-    
-    // Configure APK output to apk directory only
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def outputFile = output.outputFile
-            if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                def buildType = variant.buildType.name
-                def fileName = "${buildType}_browser.apk"
-                outputFileName = fileName
-                
-                // Copy APK to apk directory after build
-                variant.assembleProvider.get().doLast {
-                    copy {
-                        from outputFile.parent
-                        into "${rootProject.projectDir}/apk"
-                        include fileName
-                    }
-                    
-                    // Also create a generic browser.apk for the latest build
-                    copy {
-                        from outputFile.parent
-                        into "${rootProject.projectDir}/apk"
-                        include fileName
-                        rename fileName, "browser.apk"
-                    }
-                    
-                    println "APK built and copied to: ${rootProject.projectDir}/apk/${fileName}"
-                }
-            }
-        }
-    }
 }
 
 dependencies {
@@ -91,9 +58,5 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    // Add the WindowInsets compatibility library for newer UI handling
     implementation 'androidx.core:core:1.13.1'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
