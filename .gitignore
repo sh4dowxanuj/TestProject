@@ -8,6 +8,33 @@
 .cxx
 output.json
 
+# Build outputs
+build/
+*/build/
+app/build/
+
+*.aab
+*.ap_
+*.dex
+
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Android Studio generated files
+.navigation/
+app/release/
+app/debug/
+
+# Lint reports
+lint-report.html
+lint-report.xml
+lint-results.html
+lint-results.xml
+
 # Large files that exceed GitHub limits
 cmdline-tools.zip
 TestProject.zip

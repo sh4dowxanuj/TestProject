@@ -48,6 +48,27 @@ android {
             manifest.srcFile 'src/main/AndroidManifest.xml'
         }
     }
+    
+    // Configure APK output directory
+    // APKs will be placed in /apk directory (ignored by git)
+    // This is for development convenience only
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            def apkDir = new File(project.rootDir, "apk")
+            def fileName = "${variant.name}_${variant.versionName}.apk"
+            outputFileName = fileName
+            
+            // Create apk directory if it doesn't exist
+            variant.assemble.doLast {
+                apkDir.mkdirs()
+                def sourceFile = variant.outputs.first().outputFile
+                def destFile = new File(apkDir, fileName)
+                sourceFile.renameTo(destFile)
+                println "APK moved to: ${destFile.absolutePath}"
+                println "Note: APK files are not tracked in git (see .gitignore)"
+            }
+        }
+    }
 }
 
 dependencies {
