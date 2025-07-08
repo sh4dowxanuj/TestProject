@@ -37,6 +37,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -45,12 +46,14 @@ import android.widget.Toast;
 import com.example.testproject.adapters.SearchSuggestionAdapter;
 import com.example.testproject.database.DatabaseHelper;
 import com.example.testproject.models.BrowserTab;
+import com.example.testproject.models.DownloadItem;
 import com.example.testproject.models.HistoryItem;
 import com.example.testproject.models.SearchEngine;
 import com.example.testproject.models.SearchSuggestion;
 import com.example.testproject.utils.SearchEnginePreferences;
 import com.example.testproject.utils.SearchSuggestionProvider;
-import com.example.testproject.utils.DownloadManagerHelper;
+import com.example.testproject.utils.ChromeStyleDownloader;
+import com.example.testproject.utils.DownloadNotificationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,11 +76,20 @@ public class MainActivity extends AppCompatActivity {
     private Runnable searchRunnable;
     private static final int SEARCH_DELAY_MS = 300; // Delay before showing suggestions
 
+    // Chrome-style download bar components
+    private View downloadBar;
+    private TextView downloadFileName;
+    private ProgressBar downloadProgressBar;
+    private TextView downloadStatus;
+    private ImageButton downloadCancel;
+    private DownloadItem currentDownload;
+
     private List<BrowserTab> tabs;
     private int currentTabIndex = -1;
     private DatabaseHelper databaseHelper;
     private SearchEnginePreferences searchEnginePrefs;
-    private DownloadManagerHelper downloadManagerHelper;
+    private ChromeStyleDownloader chromeDownloader;
+    private DownloadNotificationManager downloadNotificationManager;
     private boolean isInFullscreenVideo = false;
 
     // Fullscreen video
@@ -195,6 +207,13 @@ public class MainActivity extends AppCompatActivity {
         webViewContainer = findViewById(R.id.webViewContainer);
         searchSuggestionsRecyclerView = findViewById(R.id.searchSuggestionsRecyclerView);
 
+        // Initialize download bar
+        downloadBar = findViewById(R.id.downloadBar);
+        downloadFileName = downloadBar.findViewById(R.id.downloadFileName);
+        downloadProgressBar = downloadBar.findViewById(R.id.downloadProgress);
+        downloadStatus = downloadBar.findViewById(R.id.downloadStatus);
+        downloadCancel = downloadBar.findViewById(R.id.downloadCancel);
+
         tabs = new ArrayList<>();
         
         // Initialize search suggestions
@@ -203,7 +222,46 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeDatabase() {
         databaseHelper = new DatabaseHelper(this);
-        downloadManagerHelper = new DownloadManagerHelper(this, databaseHelper);
+        chromeDownloader = new ChromeStyleDownloader(this, databaseHelper);
+        downloadNotificationManager = new DownloadNotificationManager(this);
+        
+        // Set up download progress listener
+        chromeDownloader.setProgressListener(new ChromeStyleDownloader.DownloadProgressListener() {
+            @Override
+            public void onDownloadStarted(DownloadItem item) {
+                runOnUiThread(() -> {
+                    currentDownload = item;
+                    showDownloadBar(item);
+                    downloadNotificationManager.showDownloadProgress(item);
+                });
+            }
+
+            @Override
+            public void onDownloadProgress(DownloadItem item) {
+                runOnUiThread(() -> {
+                    updateDownloadBar(item);
+                    downloadNotificationManager.showDownloadProgress(item);
+                });
+            }
+
+            @Override
+            public void onDownloadCompleted(DownloadItem item) {
+                runOnUiThread(() -> {
+                    hideDownloadBar();
+                    downloadNotificationManager.showDownloadCompleted(item);
+                    Toast.makeText(MainActivity.this, "Download completed: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onDownloadFailed(DownloadItem item, String error) {
+                runOnUiThread(() -> {
+                    hideDownloadBar();
+                    downloadNotificationManager.showDownloadFailed(item, error);
+                    Toast.makeText(MainActivity.this, "Download failed: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
     }
 
     private void initializeSearchEngine() {
@@ -840,8 +898,8 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // Cleanup download manager
-        if (downloadManagerHelper != null) {
-            downloadManagerHelper.cleanup();
+        if (chromeDownloader != null) {
+            chromeDownloader.cleanup();
         }
     }
     
@@ -939,33 +997,67 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void handleDownload(String url, String userAgent, String contentDisposition, String mimeType) {
-        // For Android 10+ (API 29+), we use scoped storage - no special permissions needed
-        // For Android 6-9 (API 23-28), we check for legacy storage permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Android 10+ - scoped storage, no permission needed for Downloads folder
-            startDownload(url, userAgent, contentDisposition, mimeType);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android 6-9 - check legacy storage permission
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                // Request legacy storage permission
-                ActivityCompat.requestPermissions(this, 
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
-                    PERMISSION_REQUEST_STORAGE);
-                return;
+    private void showDownloadBar(DownloadItem item) {
+        downloadBar.setVisibility(View.VISIBLE);
+        downloadFileName.setText(item.getTitle());
+        downloadProgressBar.setProgress(0);
+        downloadStatus.setText("Starting download...");
+        
+        downloadCancel.setOnClickListener(v -> {
+            if (currentDownload != null) {
+                chromeDownloader.cancelDownload(currentDownload.getId());
+                hideDownloadBar();
+                Toast.makeText(this, "Download cancelled", Toast.LENGTH_SHORT).show();
             }
-            startDownload(url, userAgent, contentDisposition, mimeType);
-        } else {
-            // Below Android 6 - permissions granted at install time
-            startDownload(url, userAgent, contentDisposition, mimeType);
+        });
+    }
+
+    private void updateDownloadBar(DownloadItem item) {
+        if (downloadBar.getVisibility() == View.VISIBLE && currentDownload != null && 
+            currentDownload.getId() == item.getId()) {
+            
+            int progress = item.getProgress();
+            downloadProgressBar.setProgress(progress);
+            
+            if (item.getFileSize() > 0) {
+                String statusText = progress + "% - " + formatFileSize(item.getDownloadedSize()) + 
+                                  " of " + formatFileSize(item.getFileSize());
+                downloadStatus.setText(statusText);
+            } else {
+                downloadStatus.setText(progress + "% - " + formatFileSize(item.getDownloadedSize()));
+            }
         }
     }
 
-    private void startDownload(String url, String userAgent, String contentDisposition, String mimeType) {
-        long downloadId = downloadManagerHelper.startDownload(url, userAgent, contentDisposition, mimeType);
-        Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show();
+    private void hideDownloadBar() {
+        downloadBar.setVisibility(View.GONE);
+        currentDownload = null;
     }
 
+    private boolean hasStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // On Android 10+ we use scoped storage, no special permissions needed
+            return true;
+        } else {
+            // On Android 6-9, we need legacy storage permissions
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) 
+                   == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+    
+    private void requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // No permission needed on Android 10+
+            return;
+        }
+        
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                PERMISSION_REQUEST_STORAGE);
+        }
+    }
+    
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -974,8 +1066,37 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Storage permission granted. You can now download files.", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Storage permission denied. Downloads may not work on this Android version.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Storage permission denied. Downloads may not work.", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    
+    private void handleDownload(String url, String userAgent, String contentDisposition, String mimeType) {
+        // Check and request storage permissions if needed (for Android 6-9)
+        if (!hasStoragePermission()) {
+            // Store download info for later
+            // For now, we'll just request permission and the user will need to retry
+            requestStoragePermission();
+            Toast.makeText(this, "Storage permission required for downloads", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Start download using ChromeStyleDownloader
+        chromeDownloader.startDownload(url, userAgent, contentDisposition, mimeType);
+    }
+    
+    private String formatFileSize(long bytes) {
+        if (bytes == 0) return "0 B";
+        
+        String[] units = {"B", "KB", "MB", "GB"};
+        int unitIndex = 0;
+        double size = bytes;
+        
+        while (size >= 1024 && unitIndex < units.length - 1) {
+            size /= 1024;
+            unitIndex++;
+        }
+        
+        return String.format("%.1f %s", size, units[unitIndex]);
     }
 }
