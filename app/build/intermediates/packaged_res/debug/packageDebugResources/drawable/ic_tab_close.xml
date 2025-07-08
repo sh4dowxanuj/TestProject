@@ -1,9 +1,0 @@
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="16dp"
-    android:height="16dp"
-    android:viewportWidth="16"
-    android:viewportHeight="16">
-  <path
-      android:fillColor="@color/tab_close_button_dark"
-      android:pathData="M8,6.59L10.59,4L12,5.41L9.41,8L12,10.59L10.59,12L8,9.41L5.41,12L4,10.59L6.59,8L4,5.41L5.41,4L8,6.59Z"/>
-</vector>
