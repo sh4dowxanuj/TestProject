@@ -7,11 +7,16 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -30,11 +35,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.testproject.adapters.SearchSuggestionAdapter;
 import com.example.testproject.database.DatabaseHelper;
 import com.example.testproject.models.BrowserTab;
 import com.example.testproject.models.HistoryItem;
 import com.example.testproject.models.SearchEngine;
+import com.example.testproject.models.SearchSuggestion;
 import com.example.testproject.utils.SearchEnginePreferences;
+import com.example.testproject.utils.SearchSuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +56,24 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton backButton, forwardButton, refreshButton, homeButton, menuButton;
     private ProgressBar progressBar;
     private FrameLayout webViewContainer;
+    
+    // Search suggestions components
+    private RecyclerView searchSuggestionsRecyclerView;
+    private SearchSuggestionAdapter suggestionAdapter;
+    private SearchSuggestionProvider suggestionProvider;
+    private Handler searchHandler = new Handler();
+    private Runnable searchRunnable;
+    private static final int SEARCH_DELAY_MS = 300; // Delay before showing suggestions
 
     private List<BrowserTab> tabs;
     private int currentTabIndex = -1;
     private DatabaseHelper databaseHelper;
     private SearchEnginePreferences searchEnginePrefs;
     private boolean isInFullscreenVideo = false;
+
+    // Fullscreen video
+    private View customView;
+    private WebChromeClient.CustomViewCallback customViewCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +95,13 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                // Handle search suggestions visibility
+                if (searchSuggestionsRecyclerView != null && 
+                    searchSuggestionsRecyclerView.getVisibility() == View.VISIBLE) {
+                    hideSuggestions();
+                    return;
+                }
+                
                 // Handle fullscreen video exit
                 if (isInFullscreenVideo) {
                     WebView currentWebView = getCurrentWebView();
@@ -154,8 +181,12 @@ public class MainActivity extends AppCompatActivity {
         menuButton = findViewById(R.id.menuButton);
         progressBar = findViewById(R.id.progressBar);
         webViewContainer = findViewById(R.id.webViewContainer);
+        searchSuggestionsRecyclerView = findViewById(R.id.searchSuggestionsRecyclerView);
 
         tabs = new ArrayList<>();
+        
+        // Initialize search suggestions
+        initializeSearchSuggestions();
     }
 
     private void initializeDatabase() {
@@ -165,6 +196,22 @@ public class MainActivity extends AppCompatActivity {
     private void initializeSearchEngine() {
         searchEnginePrefs = new SearchEnginePreferences(this);
         updateUrlBarHint();
+    }
+
+    private void initializeSearchSuggestions() {
+        suggestionProvider = new SearchSuggestionProvider(this);
+        suggestionAdapter = new SearchSuggestionAdapter(new ArrayList<>(), 
+            new SearchSuggestionAdapter.OnSuggestionClickListener() {
+                @Override
+                public void onSuggestionClick(SearchSuggestion suggestion) {
+                    hideSuggestions();
+                    urlEditText.setText(suggestion.getQuery());
+                    loadUrl(suggestion.getQuery());
+                }
+            });
+        
+        searchSuggestionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        searchSuggestionsRecyclerView.setAdapter(suggestionAdapter);
     }
 
     private void setupEventListeners() {
@@ -186,10 +233,35 @@ public class MainActivity extends AppCompatActivity {
                 if (actionId == EditorInfo.IME_ACTION_GO || 
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     String text = urlEditText.getText() != null ? urlEditText.getText().toString() : "";
+                    hideSuggestions();
                     loadUrl(text);
                     return true;
                 }
                 return false;
+            }
+        });
+
+        // Add text change listener for search suggestions
+        urlEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                handleSearchTextChange(s.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Hide suggestions when URL bar loses focus
+        urlEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    hideSuggestions();
+                }
             }
         });
 
@@ -735,6 +807,11 @@ public class MainActivity extends AppCompatActivity {
                 tab.getWebView().destroy();
             }
         }
+        
+        // Cleanup search suggestion provider
+        if (suggestionProvider != null) {
+            suggestionProvider.cleanup();
+        }
     }
     
     // Helper method to safely get tab count for UI operations
@@ -775,5 +852,59 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateUrlBarHint();
+    }
+
+    private void handleSearchTextChange(String query) {
+        // Cancel previous search if pending
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
+
+        if (query.trim().isEmpty()) {
+            hideSuggestions();
+            return;
+        }
+
+        // Create new search runnable with delay to avoid too many requests
+        searchRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (suggestionProvider != null) {
+                    suggestionProvider.getSuggestions(query, new SearchSuggestionProvider.SuggestionCallback() {
+                        @Override
+                        public void onSuggestionsReady(List<SearchSuggestion> suggestions) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    showSuggestions(suggestions);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        };
+
+        // Post with delay
+        searchHandler.postDelayed(searchRunnable, SEARCH_DELAY_MS);
+    }
+
+    private void showSuggestions(List<SearchSuggestion> suggestions) {
+        if (suggestions != null && !suggestions.isEmpty() && urlEditText.hasFocus()) {
+            suggestionAdapter.updateSuggestions(suggestions);
+            searchSuggestionsRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            hideSuggestions();
+        }
+    }
+
+    private void hideSuggestions() {
+        if (searchSuggestionsRecyclerView != null) {
+            searchSuggestionsRecyclerView.setVisibility(View.GONE);
+        }
+        // Cancel any pending search
+        if (searchRunnable != null) {
+            searchHandler.removeCallbacks(searchRunnable);
+        }
     }
 }

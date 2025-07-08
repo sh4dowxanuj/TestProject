@@ -158,4 +158,57 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(TABLE_HISTORY, COLUMN_HISTORY_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
     }
+
+    // Search methods for suggestions
+    public List<HistoryItem> searchHistory(String query, int limit) {
+        List<HistoryItem> historyItems = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_HISTORY + 
+                " WHERE " + COLUMN_HISTORY_TITLE + " LIKE ? OR " + COLUMN_HISTORY_URL + " LIKE ?" +
+                " ORDER BY " + COLUMN_HISTORY_TIMESTAMP + " DESC LIMIT ?";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String searchPattern = "%" + query + "%";
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{searchPattern, searchPattern, String.valueOf(limit)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                HistoryItem historyItem = new HistoryItem();
+                historyItem.setId(cursor.getLong(0));
+                historyItem.setTitle(cursor.getString(1));
+                historyItem.setUrl(cursor.getString(2));
+                historyItem.setTimestamp(cursor.getLong(3));
+                historyItems.add(historyItem);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return historyItems;
+    }
+
+    public List<Bookmark> searchBookmarks(String query, int limit) {
+        List<Bookmark> bookmarks = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_BOOKMARKS + 
+                " WHERE " + COLUMN_BOOKMARK_TITLE + " LIKE ? OR " + COLUMN_BOOKMARK_URL + " LIKE ?" +
+                " ORDER BY " + COLUMN_BOOKMARK_TIMESTAMP + " DESC LIMIT ?";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        String searchPattern = "%" + query + "%";
+        Cursor cursor = db.rawQuery(selectQuery, new String[]{searchPattern, searchPattern, String.valueOf(limit)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                Bookmark bookmark = new Bookmark();
+                bookmark.setId(cursor.getLong(0));
+                bookmark.setTitle(cursor.getString(1));
+                bookmark.setUrl(cursor.getString(2));
+                bookmark.setTimestamp(cursor.getLong(3));
+                bookmarks.add(bookmark);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return bookmarks;
+    }
 }

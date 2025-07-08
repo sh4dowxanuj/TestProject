@@ -1,13 +1,10 @@
-# Chro### Core Browser Features
-- **Multi-Tab Browsing** - Open and manage multiple tabs with smooth switching
-- **WebView Integration** - Full HTML5, CSS3, and JavaScript support
-- **Navigation Controls** - Back, forward, refresh, and home buttons
-- **Smart URL Bar** - Intelligent URL input with customizable search functionality
-- **Multiple Search Engines** - Choose from Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
-- **Progress Indicator** - Visual loading progress for web pages
-- **Fullscreen Video Support** - Seamless video playback experience without UI interference Browser - Android App
+# Chrome Browser - Android App
 
 A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience similar to Chrome.
+
+## ✨ Latest Feature: Search Suggestions
+
+🔍 **NEW**: Real-time search suggestions as you type! Get instant suggestions from your browsing history, bookmarks, and Google's autocomplete service.
 
 ## 🚀 Features
 
@@ -15,9 +12,46 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Multi-Tab Browsing** - Open and manage multiple tabs with smooth switching
 - **WebView Integration** - Full HTML5, CSS3, and JavaScript support
 - **Navigation Controls** - Back, forward, refresh, and home buttons
-- **URL Bar** - Smart URL input with search functionality
+- **Smart URL Bar** - Intelligent URL input with real-time search suggestions
+- **Search Suggestions** - Live suggestions from history, bookmarks, and online sources
+- **Multiple Search Engines** - Choose from Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
 - **Progress Indicator** - Visual loading progress for web pages
 - **Fullscreen Video Support** - Seamless video playback experience
+
+### Search & Discovery
+- **Real-time Suggestions** - Get suggestions as you type from multiple sources
+- **History Integration** - Quick access to previously visited pages
+- **Bookmark Suggestions** - Find saved websites instantly
+- **Online Autocomplete** - Google-powered search suggestions
+- **Smart UI** - Suggestions hide/show intelligently with proper visual feedback
+
+## 🔍 Search Suggestions Feature (NEW)
+
+### How it Works
+1. **Start typing** in the URL bar
+2. **Wait 300ms** for intelligent suggestions to appear
+3. **See suggestions** from multiple sources with visual icons:
+   - 🔍 **Search queries** - Live Google autocomplete suggestions
+   - 📖 **History** - Pages you've visited before
+   - ⭐ **Bookmarks** - Your saved favorite sites
+   - ➡️ **URLs** - Direct website suggestions
+4. **Tap any suggestion** to navigate instantly
+5. **Suggestions hide** automatically when not needed
+
+### Smart Features
+- **Real-time Display**: Suggestions appear as you type with optimized timing
+- **Multiple Sources**: Combines local data (history/bookmarks) with online suggestions
+- **Performance Optimized**: Background processing with 300ms debounce delay
+- **Touch Friendly**: Large, easy-to-tap suggestion items
+- **Visual Indicators**: Different icons help identify suggestion types
+- **Auto-hide**: Suggestions disappear when you tap elsewhere or press back
+
+### Technical Details
+- Maximum 8 suggestions total (3 history + 2 bookmarks + 5 online)
+- Uses Google's autocomplete API for search suggestions
+- Database search for local history and bookmarks
+- Modern threading prevents UI blocking
+- Graceful fallback if network is unavailable
 
 ### Tab Management
 - **Dynamic Tab Creation** - Create new tabs with a single tap
@@ -94,7 +128,15 @@ A modern, feature-rich Android browser application built with Java, designed to 
 
 ### Version 1.0 - Latest Updates
 
-#### 🔍 Search Engine Integration (Latest)
+#### 🔍 Search Suggestions Feature (NEW)
+- **Real-time Suggestions**: Live search suggestions as you type in the URL bar
+- **Multiple Sources**: Combines history, bookmarks, and online Google suggestions
+- **Smart UI**: Suggestions appear with 300ms delay, hide on focus loss or back press
+- **Visual Indicators**: Different icons for search, history, bookmarks, and URL suggestions
+- **Performance Optimized**: Background threading, debounced requests, limited results
+- **Touch Friendly**: Large touch targets with Material Design styling
+
+#### 🔍 Search Engine Integration 
 - **Multiple Search Engines**: Support for Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
 - **Settings Integration**: Easy search engine selection in Settings menu
 - **Persistent Preferences**: User choice saved using SharedPreferences
@@ -184,9 +226,17 @@ The build process generates APK files in the `/apk` directory:
 ### Basic Navigation
 1. **Open the app** - Launches with Google homepage
 2. **Enter URL** - Type in the URL bar or search terms
-3. **Create new tab** - Tap the + button in the tab bar
-4. **Switch tabs** - Tap on any tab to switch to it
-5. **Close tab** - Tap the X button on any tab
+3. **Use search suggestions** - Start typing to see real-time suggestions
+4. **Create new tab** - Tap the + button in the tab bar
+5. **Switch tabs** - Tap on any tab to switch to it
+6. **Close tab** - Tap the X button on any tab
+
+### Using Search Suggestions
+1. **Start typing** in the URL bar
+2. **View suggestions** - See history, bookmarks, and search suggestions appear
+3. **Select suggestion** - Tap any suggestion to navigate instantly
+4. **Hide suggestions** - Tap elsewhere or press back to hide
+5. **Identify types** - Look for icons: 🔍 search, 📖 history, ⭐ bookmarks
 
 ### Managing Bookmarks
 1. **Add bookmark** - Menu → Add Bookmark
