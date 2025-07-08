@@ -4,13 +4,17 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +30,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.DownloadListener;
+
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -43,6 +49,7 @@ import com.example.testproject.models.SearchEngine;
 import com.example.testproject.models.SearchSuggestion;
 import com.example.testproject.utils.SearchEnginePreferences;
 import com.example.testproject.utils.SearchSuggestionProvider;
+import com.example.testproject.utils.DownloadManagerHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,11 +76,15 @@ public class MainActivity extends AppCompatActivity {
     private int currentTabIndex = -1;
     private DatabaseHelper databaseHelper;
     private SearchEnginePreferences searchEnginePrefs;
+    private DownloadManagerHelper downloadManagerHelper;
     private boolean isInFullscreenVideo = false;
 
     // Fullscreen video
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
+
+    // Permission request codes
+    private static final int PERMISSION_REQUEST_STORAGE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeDatabase() {
         databaseHelper = new DatabaseHelper(this);
+        downloadManagerHelper = new DownloadManagerHelper(this, databaseHelper);
     }
 
     private void initializeSearchEngine() {
@@ -363,6 +375,16 @@ public class MainActivity extends AppCompatActivity {
             
             // Enable fullscreen video support
             webSettings.setMediaPlaybackRequiresUserGesture(false);
+            
+            // Set download listener
+            webView.setDownloadListener(new DownloadListener() {
+                @Override
+                public void onDownloadStart(String url, String userAgent, String contentDisposition, 
+                                          String mimeType, long contentLength) {
+                    handleDownload(url, userAgent, contentDisposition, mimeType);
+                }
+            });
+            
             // Note: setAllowFileAccessFromFileURLs and setAllowUniversalAccessFromFileURLs 
             // are deprecated for security reasons. Only enable if absolutely necessary for your use case.
             // Consider using a more secure approach like serving files from assets or resources
@@ -742,6 +764,9 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.action_history) {
                     startActivity(new Intent(MainActivity.this, HistoryActivity.class));
                     return true;
+                } else if (itemId == R.id.action_downloads) {
+                    startActivity(new Intent(MainActivity.this, DownloadsActivity.class));
+                    return true;
                 } else if (itemId == R.id.action_settings) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     return true;
@@ -811,6 +836,11 @@ public class MainActivity extends AppCompatActivity {
         // Cleanup search suggestion provider
         if (suggestionProvider != null) {
             suggestionProvider.cleanup();
+        }
+        
+        // Cleanup download manager
+        if (downloadManagerHelper != null) {
+            downloadManagerHelper.cleanup();
         }
     }
     
@@ -905,6 +935,36 @@ public class MainActivity extends AppCompatActivity {
         // Cancel any pending search
         if (searchRunnable != null) {
             searchHandler.removeCallbacks(searchRunnable);
+        }
+    }
+
+    private void handleDownload(String url, String userAgent, String contentDisposition, String mimeType) {
+        // Check permissions first
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                // Request permission
+                ActivityCompat.requestPermissions(this, 
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
+                    PERMISSION_REQUEST_STORAGE);
+                return;
+            }
+        }
+        
+        // Start download
+        long downloadId = downloadManagerHelper.startDownload(url, userAgent, contentDisposition, mimeType);
+        Toast.makeText(this, "Download started", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        
+        if (requestCode == PERMISSION_REQUEST_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Storage permission granted. Try downloading again.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Storage permission denied. Cannot download files.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

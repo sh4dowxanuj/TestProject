@@ -21,6 +21,11 @@
         android:title="History" />
     
     <item
+        android:id="@+id/action_downloads"
+        android:icon="@drawable/ic_download"
+        android:title="Downloads" />
+    
+    <item
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share"
         android:title="Share" />

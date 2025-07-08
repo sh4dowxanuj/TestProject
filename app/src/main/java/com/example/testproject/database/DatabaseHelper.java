@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.testproject.models.Bookmark;
+import com.example.testproject.models.DownloadItem;
 import com.example.testproject.models.HistoryItem;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "browser.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Bookmarks table
     private static final String TABLE_BOOKMARKS = "bookmarks";
@@ -29,6 +30,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_HISTORY_TITLE = "title";
     private static final String COLUMN_HISTORY_URL = "url";
     private static final String COLUMN_HISTORY_TIMESTAMP = "timestamp";
+
+    // Downloads table
+    private static final String TABLE_DOWNLOADS = "downloads";
+    private static final String COLUMN_DOWNLOAD_ID = "id";
+    private static final String COLUMN_DOWNLOAD_TITLE = "title";
+    private static final String COLUMN_DOWNLOAD_URL = "url";
+    private static final String COLUMN_DOWNLOAD_FILENAME = "filename";
+    private static final String COLUMN_DOWNLOAD_FILEPATH = "filepath";
+    private static final String COLUMN_DOWNLOAD_FILESIZE = "filesize";
+    private static final String COLUMN_DOWNLOAD_DOWNLOADED_SIZE = "downloaded_size";
+    private static final String COLUMN_DOWNLOAD_STATUS = "status";
+    private static final String COLUMN_DOWNLOAD_TIMESTAMP = "timestamp";
+    private static final String COLUMN_DOWNLOAD_MIMETYPE = "mimetype";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -48,14 +62,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + COLUMN_HISTORY_URL + " TEXT,"
                 + COLUMN_HISTORY_TIMESTAMP + " INTEGER" + ")";
 
+        String CREATE_DOWNLOADS_TABLE = "CREATE TABLE " + TABLE_DOWNLOADS + "("
+                + COLUMN_DOWNLOAD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_DOWNLOAD_TITLE + " TEXT,"
+                + COLUMN_DOWNLOAD_URL + " TEXT,"
+                + COLUMN_DOWNLOAD_FILENAME + " TEXT,"
+                + COLUMN_DOWNLOAD_FILEPATH + " TEXT,"
+                + COLUMN_DOWNLOAD_FILESIZE + " INTEGER,"
+                + COLUMN_DOWNLOAD_DOWNLOADED_SIZE + " INTEGER,"
+                + COLUMN_DOWNLOAD_STATUS + " INTEGER,"
+                + COLUMN_DOWNLOAD_TIMESTAMP + " INTEGER,"
+                + COLUMN_DOWNLOAD_MIMETYPE + " TEXT" + ")";
+
         db.execSQL(CREATE_BOOKMARKS_TABLE);
         db.execSQL(CREATE_HISTORY_TABLE);
+        db.execSQL(CREATE_DOWNLOADS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKMARKS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_HISTORY);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_DOWNLOADS);
         onCreate(db);
     }
 
@@ -210,5 +238,77 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return bookmarks;
+    }
+
+    // Download methods
+    public long addDownloadItem(DownloadItem downloadItem) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DOWNLOAD_TITLE, downloadItem.getTitle());
+        values.put(COLUMN_DOWNLOAD_URL, downloadItem.getUrl());
+        values.put(COLUMN_DOWNLOAD_FILENAME, downloadItem.getFileName());
+        values.put(COLUMN_DOWNLOAD_FILEPATH, downloadItem.getFilePath());
+        values.put(COLUMN_DOWNLOAD_FILESIZE, downloadItem.getFileSize());
+        values.put(COLUMN_DOWNLOAD_DOWNLOADED_SIZE, downloadItem.getDownloadedSize());
+        values.put(COLUMN_DOWNLOAD_STATUS, downloadItem.getStatus());
+        values.put(COLUMN_DOWNLOAD_TIMESTAMP, downloadItem.getTimestamp());
+        values.put(COLUMN_DOWNLOAD_MIMETYPE, downloadItem.getMimeType());
+
+        long id = db.insert(TABLE_DOWNLOADS, null, values);
+        db.close();
+        return id;
+    }
+
+    public List<DownloadItem> getAllDownloads() {
+        List<DownloadItem> downloadItems = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_DOWNLOADS + " ORDER BY " + COLUMN_DOWNLOAD_TIMESTAMP + " DESC";
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                DownloadItem downloadItem = new DownloadItem();
+                downloadItem.setId(cursor.getLong(0));
+                downloadItem.setTitle(cursor.getString(1));
+                downloadItem.setUrl(cursor.getString(2));
+                downloadItem.setFileName(cursor.getString(3));
+                downloadItem.setFilePath(cursor.getString(4));
+                downloadItem.setFileSize(cursor.getLong(5));
+                downloadItem.setDownloadedSize(cursor.getLong(6));
+                downloadItem.setStatus(cursor.getInt(7));
+                downloadItem.setTimestamp(cursor.getLong(8));
+                downloadItem.setMimeType(cursor.getString(9));
+                downloadItems.add(downloadItem);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return downloadItems;
+    }
+
+    public void deleteDownloadItem(long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_DOWNLOADS, COLUMN_DOWNLOAD_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
+    }
+
+    public void updateDownload(DownloadItem downloadItem) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DOWNLOAD_DOWNLOADED_SIZE, downloadItem.getDownloadedSize());
+        values.put(COLUMN_DOWNLOAD_STATUS, downloadItem.getStatus());
+        values.put(COLUMN_DOWNLOAD_FILESIZE, downloadItem.getFileSize());
+        
+        db.update(TABLE_DOWNLOADS, values, COLUMN_DOWNLOAD_ID + " = ?", 
+                 new String[]{String.valueOf(downloadItem.getId())});
+        db.close();
+    }
+
+    public void clearDownloads() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_DOWNLOADS, null, null);
+        db.close();
     }
 }

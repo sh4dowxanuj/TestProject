@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Chrome Browser</string>
+    <string name="downloads">Downloads</string>
+    <string name="download_started">Download started</string>
+    <string name="download_completed">Download completed</string>
+    <string name="download_failed">Download failed</string>
+    <string name="no_downloads">No downloads</string>
+    <string name="clear_all_downloads">Clear all downloads</string>
+    <string name="download_removed">Download removed</string>
+    <string name="all_downloads_cleared">All downloads cleared</string>
+    <string name="file_not_found">File not found</string>
+    <string name="no_app_to_open_file">No app found to open this file</string>
+    <string name="storage_permission_granted">Storage permission granted. Try downloading again.</string>
+    <string name="storage_permission_denied">Storage permission denied. Cannot download files.</string>
+    <string name="download_not_completed">Download not completed</string>
 </resources>
