@@ -1,4 +1,11 @@
-# Chrome Like Browser - Android App
+# Chro### Core Browser Features
+- **Multi-Tab Browsing** - Open and manage multiple tabs with smooth switching
+- **WebView Integration** - Full HTML5, CSS3, and JavaScript support
+- **Navigation Controls** - Back, forward, refresh, and home buttons
+- **Smart URL Bar** - Intelligent URL input with customizable search functionality
+- **Multiple Search Engines** - Choose from Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
+- **Progress Indicator** - Visual loading progress for web pages
+- **Fullscreen Video Support** - Seamless video playback experience without UI interference Browser - Android App
 
 A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience similar to Chrome.
 
@@ -28,6 +35,8 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Delete Functionality** - Remove individual bookmarks and history items
 
 ### Settings & Customization
+- **Search Engine Selection** - Choose your preferred search engine from 6 popular options
+- **Dynamic URL Bar** - Shows selected search engine in hint text
 - **JavaScript Toggle** - Enable/disable JavaScript execution
 - **Cache Management** - Clear browser cache and temporary files
 - **Data Management** - Clear all browsing data and app data
@@ -51,10 +60,11 @@ A modern, feature-rich Android browser application built with Java, designed to 
 
 ### Navigation
 - **Intuitive Controls** - Easy-to-use navigation buttons
-- **Smart URL Bar** - Auto-complete and search suggestions
+- **Smart URL Bar** - Auto-detects URLs vs searches, uses selected search engine
 - **Tab Bar** - Horizontal scrollable tab interface
 - **Menu System** - Organized popup menu for quick actions
 - **Gesture Support** - Back gesture and touch navigation
+- **Fullscreen Mode** - Complete UI hiding for immersive video experience
 
 ## 🛠️ Technical Specifications
 
@@ -84,7 +94,25 @@ A modern, feature-rich Android browser application built with Java, designed to 
 
 ### Version 1.0 - Latest Updates
 
-#### 🎯 Tab UI Improvements (Latest)
+#### 🔍 Search Engine Integration (Latest)
+- **Multiple Search Engines**: Support for Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
+- **Settings Integration**: Easy search engine selection in Settings menu
+- **Persistent Preferences**: User choice saved using SharedPreferences
+- **Dynamic URL Bar**: Hint text updates to show selected search engine
+- **Smart Detection**: Automatically distinguishes between URLs and search queries
+
+#### � Fullscreen Video Enhancement (Latest)
+- **Complete UI Hiding**: Tab bar, navigation bar, and all UI elements hidden during fullscreen
+- **System UI Control**: Proper status bar and navigation bar management
+- **Back Press Handling**: Smooth exit from fullscreen mode
+- **Tab Restoration**: All UI elements properly restored after fullscreen
+
+#### 🏗️ Build System Configuration (Latest)
+- **Centralized APK Output**: All APKs now built directly to `/apk` directory
+- **Clean Project Structure**: No APK files cluttering root directory
+- **Multiple Build Types**: Support for both debug and release builds
+- **Automated Copying**: Gradle automatically manages APK placement
+#### 🎯 Tab UI Improvements
 - **Enhanced Tab Management**: Improved tab creation and switching logic
 - **Visual Feedback**: Better selected tab indication with borders and colors
 - **Auto-Scrolling**: Automatic scrolling to show active tab
@@ -135,10 +163,10 @@ git clone https://github.com/sh4dowxanuj/TestProject.git
 # Navigate to project directory
 cd TestProject
 
-# Build debug APK
+# Build debug APK (outputs to /apk directory)
 ./gradlew assembleDebug
 
-# Build release APK
+# Build release APK (outputs to /apk directory)
 ./gradlew assembleRelease
 
 # Install on device
@@ -146,10 +174,10 @@ cd TestProject
 ```
 
 ### APK Files
-The build process generates multiple APK files:
-- `debug_browser.apk` - Debug version for testing
-- `release_browser.apk` - Release version for distribution
-- `browser.apk` - Latest debug build in root directory
+The build process generates APK files in the `/apk` directory:
+- `/apk/debug_browser.apk` - Debug version for testing
+- `/apk/release_browser.apk` - Release version for distribution  
+- `/apk/browser.apk` - Generic copy of the latest build
 
 ## 🎯 Usage Guide
 
@@ -174,9 +202,10 @@ The build process generates multiple APK files:
 
 ### Settings & Privacy
 1. **Access settings** - Menu → Settings
-2. **Toggle JavaScript** - Use the JavaScript switch
-3. **Clear cache** - Tap "Clear Cache" button
-4. **Clear all data** - Tap "Clear All Data" button
+2. **Change search engine** - Tap on "Search Engine" option, select from dialog
+3. **Toggle JavaScript** - Use the JavaScript switch
+4. **Clear cache** - Tap "Clear Cache" button
+5. **Clear all data** - Tap "Clear All Data" button
 
 ## 🔄 Project Structure
 
@@ -188,8 +217,9 @@ app/
 │   │   ├── BookmarksActivity.java      # Bookmark management
 │   │   ├── HistoryActivity.java        # History management
 │   │   ├── SettingsActivity.java       # Settings and preferences
-│   │   ├── models/                     # Data models
+│   │   ├── models/                     # Data models (BrowserTab, SearchEngine)
 │   │   ├── adapters/                   # RecyclerView adapters
+│   │   ├── utils/                      # Utility classes (SearchEnginePreferences)
 │   │   └── database/                   # Database helper
 │   ├── res/
 │   │   ├── layout/                     # XML layouts
@@ -233,6 +263,9 @@ This project is open source and available under the [MIT License](LICENSE).
 - ✅ Modern Android API migration completed
 - ✅ Build system modernization finished
 - ✅ Security improvements implemented
+- ✅ Search engine integration added
+- ✅ Fullscreen video UI fixes completed
+- ✅ APK output configuration centralized
 
 ## 📞 Support
 

@@ -33,13 +33,14 @@ import android.widget.Toast;
 import com.example.testproject.database.DatabaseHelper;
 import com.example.testproject.models.BrowserTab;
 import com.example.testproject.models.HistoryItem;
+import com.example.testproject.models.SearchEngine;
+import com.example.testproject.utils.SearchEnginePreferences;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_URL = "https://www.google.com";
-    private static final String SEARCH_URL = "https://www.google.com/search?q=";
 
     private LinearLayout tabContainer;
     private HorizontalScrollView tabScrollView;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private List<BrowserTab> tabs;
     private int currentTabIndex = -1;
     private DatabaseHelper databaseHelper;
+    private SearchEnginePreferences searchEnginePrefs;
     private boolean isInFullscreenVideo = false;
 
     @Override
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         initializeViews();
         initializeDatabase();
+        initializeSearchEngine();
         setupEventListeners();
         setupBackPressedHandler();
         
@@ -157,6 +160,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeDatabase() {
         databaseHelper = new DatabaseHelper(this);
+    }
+
+    private void initializeSearchEngine() {
+        searchEnginePrefs = new SearchEnginePreferences(this);
+        updateUrlBarHint();
     }
 
     private void setupEventListeners() {
@@ -372,6 +380,7 @@ public class MainActivity extends AppCompatActivity {
                 
                 // Hide browser UI elements
                 if (tabScrollView != null) tabScrollView.setVisibility(View.GONE);
+                findViewById(R.id.newTabButton).setVisibility(View.GONE);
                 findViewById(R.id.navigationBar).setVisibility(View.GONE);
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
                 
@@ -411,6 +420,7 @@ public class MainActivity extends AppCompatActivity {
                 
                 // Show browser UI elements
                 if (tabScrollView != null) tabScrollView.setVisibility(View.VISIBLE);
+                findViewById(R.id.newTabButton).setVisibility(View.VISIBLE);
                 findViewById(R.id.navigationBar).setVisibility(View.VISIBLE);
                 
                 // Restore normal browsing mode (with status bar)
@@ -624,7 +634,8 @@ public class MainActivity extends AppCompatActivity {
         } else if (input.contains(".") && !input.contains(" ")) {
             url = "https://" + input;
         } else {
-            url = SEARCH_URL + input.replace(" ", "+");
+            SearchEngine selectedEngine = searchEnginePrefs.getSelectedSearchEngine();
+            url = selectedEngine.getSearchUrl() + input.replace(" ", "+");
         }
 
         getCurrentTab().setUrl(url);
@@ -750,5 +761,19 @@ public class MainActivity extends AppCompatActivity {
             currentTabIndex = Math.max(0, tabs.size() - 1);
         }
         updateTabSelection();
+    }
+
+    private void updateUrlBarHint() {
+        if (urlEditText != null && searchEnginePrefs != null) {
+            SearchEngine selectedEngine = searchEnginePrefs.getSelectedSearchEngine();
+            String hint = "Enter URL or search with " + selectedEngine.getName() + "...";
+            urlEditText.setHint(hint);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateUrlBarHint();
     }
 }

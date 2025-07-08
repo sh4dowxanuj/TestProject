@@ -51,7 +51,7 @@ android {
         }
     }
     
-    // Configure APK output to project directory
+    // Configure APK output to apk directory only
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def outputFile = output.outputFile
@@ -60,9 +60,15 @@ android {
                 def fileName = "${buildType}_browser.apk"
                 outputFileName = fileName
                 
-                // Copy APK to multiple locations after build
+                // Copy APK to apk directory after build
                 variant.assembleProvider.get().doLast {
-                    // Copy to apk directory (existing)
+                    copy {
+                        from outputFile.parent
+                        into "${rootProject.projectDir}/apk"
+                        include fileName
+                    }
+                    
+                    // Also create a generic browser.apk for the latest build
                     copy {
                         from outputFile.parent
                         into "${rootProject.projectDir}/apk"
@@ -70,22 +76,7 @@ android {
                         rename fileName, "browser.apk"
                     }
                     
-                    // Copy to root directory with build type name
-                    copy {
-                        from outputFile.parent
-                        into "${rootProject.projectDir}"
-                        include fileName
-                    }
-                    
-                    // Copy latest debug build as browser.apk in root
-                    if (buildType == "debug") {
-                        copy {
-                            from outputFile.parent
-                            into "${rootProject.projectDir}"
-                            include fileName
-                            rename fileName, "browser.apk"
-                        }
-                    }
+                    println "APK built and copied to: ${rootProject.projectDir}/apk/${fileName}"
                 }
             }
         }
