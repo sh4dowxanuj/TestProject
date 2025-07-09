@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    
+    <!-- Background circle -->
+    <path
+        android:fillColor="#0F1419"
+        android:pathData="M24,2C12.95,2 4,10.95 4,22s8.95,20 20,20s20,-8.95 20,-20S35.05,2 24,2z"/>
+    
+    <!-- Subtle background gradient -->
+    <path
+        android:fillColor="#1A1F36"
+        android:pathData="M24,2C12.95,2 4,10.95 4,22s8.95,20 20,20s20,-8.95 20,-20S35.05,2 24,2z"
+        android:fillAlpha="0.3"/>
+    
+    <!-- Main thunder bolt -->
+    <path
+        android:fillColor="#FFD700"
+        android:pathData="M26,8L18,24h6l-3,16 11,-16h-6l3,-16z"/>
+    
+    <!-- Inner highlight for depth -->
+    <path
+        android:fillColor="#FFFF99"
+        android:pathData="M26,10L20,22h4l-2,12 7,-12h-4l2,-12z"/>
+    
+    <!-- Outer glow stroke -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFD700"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M26,8L18,24h6l-3,16 11,-16h-6l3,-16z"/>
+        
+    <!-- Additional glow effect -->
+    <path
+        android:fillColor="#FFD700"
+        android:fillAlpha="0.2"
+        android:pathData="M26,8L18,24h6l-3,16 11,-16h-6l3,-16z"/>
+        
+</vector>
