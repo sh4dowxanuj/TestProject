@@ -52,13 +52,22 @@ public class SearchSuggestionProvider {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
+                // Check if thread is interrupted before processing
+                if (Thread.currentThread().isInterrupted()) {
+                    return;
+                }
+                
                 List<SearchSuggestion> suggestions = generateSuggestions(query.trim());
-                mainHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onSuggestionsReady(suggestions);
-                    }
-                });
+                
+                // Check again before posting result
+                if (!Thread.currentThread().isInterrupted()) {
+                    mainHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onSuggestionsReady(suggestions);
+                        }
+                    });
+                }
             }
         });
     }
@@ -67,11 +76,21 @@ public class SearchSuggestionProvider {
         List<SearchSuggestion> suggestions = new ArrayList<>();
         
         try {
+            // Check if thread is interrupted
+            if (Thread.currentThread().isInterrupted()) {
+                return suggestions;
+            }
+            
             // Add history suggestions
             List<HistoryItem> historyItems = databaseHelper.searchHistory(query, MAX_HISTORY_SUGGESTIONS);
             for (HistoryItem item : historyItems) {
                 suggestions.add(new SearchSuggestion(item.getTitle() + " - " + item.getUrl(), 
                     SearchSuggestion.SuggestionType.HISTORY));
+            }
+            
+            // Check if thread is interrupted
+            if (Thread.currentThread().isInterrupted()) {
+                return suggestions;
             }
             
             // Add bookmark suggestions
@@ -82,7 +101,7 @@ public class SearchSuggestionProvider {
             }
             
             // Add online search suggestions if we haven't reached the limit
-            if (suggestions.size() < MAX_SUGGESTIONS) {
+            if (suggestions.size() < MAX_SUGGESTIONS && !Thread.currentThread().isInterrupted()) {
                 List<SearchSuggestion> onlineSuggestions = getOnlineSearchSuggestions(query, 
                     MAX_SUGGESTIONS - suggestions.size());
                 suggestions.addAll(onlineSuggestions);
@@ -97,26 +116,41 @@ public class SearchSuggestionProvider {
     
     private List<SearchSuggestion> getOnlineSearchSuggestions(String query, int maxResults) {
         List<SearchSuggestion> suggestions = new ArrayList<>();
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
         
         try {
+            // Check if thread is interrupted before making network request
+            if (Thread.currentThread().isInterrupted()) {
+                return suggestions;
+            }
+            
             // Use Google's autocomplete API
             String encodedQuery = URLEncoder.encode(query, "UTF-8");
             String urlString = "http://suggestqueries.google.com/complete/search?client=firefox&q=" + encodedQuery;
             
             URL url = new URL(urlString);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setConnectTimeout(3000);
             connection.setReadTimeout(3000);
             
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            // Check if thread is interrupted before reading response
+            if (Thread.currentThread().isInterrupted()) {
+                return suggestions;
+            }
+            
+            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
             String line;
             
             while ((line = reader.readLine()) != null) {
+                // Check if thread is interrupted during reading
+                if (Thread.currentThread().isInterrupted()) {
+                    return suggestions;
+                }
                 response.append(line);
             }
-            reader.close();
             
             // Parse JSON response
             JSONArray jsonArray = new JSONArray(response.toString());
@@ -125,6 +159,10 @@ public class SearchSuggestionProvider {
                 int count = Math.min(suggestionsArray.length(), maxResults);
                 
                 for (int i = 0; i < count; i++) {
+                    // Check if thread is interrupted during parsing
+                    if (Thread.currentThread().isInterrupted()) {
+                        return suggestions;
+                    }
                     String suggestion = suggestionsArray.getString(i);
                     suggestions.add(new SearchSuggestion(suggestion, SearchSuggestion.SuggestionType.SEARCH_QUERY));
                 }
@@ -135,14 +173,53 @@ public class SearchSuggestionProvider {
             if (query.length() > 1) {
                 suggestions.add(new SearchSuggestion(query, SearchSuggestion.SuggestionType.SEARCH_QUERY));
             }
+        } finally {
+            // Properly close resources
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception e) {
+                    // Ignore close exceptions
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.disconnect();
+                } catch (Exception e) {
+                    // Ignore disconnect exceptions
+                }
+            }
         }
         
         return suggestions;
     }
     
+    public void cancelPendingRequests() {
+        if (executorService != null && !executorService.isShutdown()) {
+            // ExecutorService doesn't have purge() method
+            // Instead, we shutdown and recreate the executor to cancel pending tasks
+            executorService.shutdownNow();
+            executorService = Executors.newCachedThreadPool();
+        }
+    }
+    
     public void cleanup() {
         if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdown();
+            executorService.shutdownNow(); // Force shutdown and interrupt running tasks
+            try {
+                // Wait for tasks to terminate
+                if (!executorService.awaitTermination(1, java.util.concurrent.TimeUnit.SECONDS)) {
+                    // Force shutdown if tasks didn't terminate
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                // Re-interrupt the thread
+                Thread.currentThread().interrupt();
+                executorService.shutdownNow();
+            }
+        }
+        if (databaseHelper != null) {
+            databaseHelper.close();
         }
     }
 }

@@ -14,6 +14,8 @@ import com.example.testproject.DownloadsActivity;
 import com.example.testproject.R;
 import com.example.testproject.models.DownloadItem;
 
+import java.util.Locale;
+
 public class DownloadNotificationManager {
     private static final String CHANNEL_ID = "downloads";
     private static final String CHANNEL_NAME = "Downloads";
@@ -138,6 +140,6 @@ public class DownloadNotificationManager {
             unitIndex++;
         }
         
-        return String.format("%.1f %s", size, units[unitIndex]);
+        return String.format(Locale.ROOT, "%.1f %s", size, units[unitIndex]);
     }
 }

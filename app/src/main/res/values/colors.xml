@@ -62,16 +62,22 @@
     <color name="text_primary_dark">#E0E0E0</color>
     <color name="text_secondary_dark">#B0B0B0</color>
     
-    <!-- Download-specific colors -->
-    <color name="download_progress_background">#3A3A3A</color>
+    <!-- Download-specific colors for light theme -->
+    <color name="download_progress_background">#E0E0E0</color>
     <color name="download_progress_accent">#4CAF50</color>
-    <color name="download_card_background">#2D2D30</color>
-    <color name="download_card_hover">#3A3A3D</color>
+    <color name="download_card_background">#FFFFFF</color>
+    <color name="download_card_hover">#F5F5F5</color>
     <color name="download_status_completed">#4CAF50</color>
     <color name="download_status_failed">#F44336</color>
     <color name="download_status_paused">#FF9800</color>
     <color name="download_status_downloading">#2196F3</color>
     <color name="download_media_overlay">#80000000</color>
     <color name="download_button_primary">#1976D2</color>
-    <color name="download_button_secondary">#424242</color>
+    <color name="download_button_secondary">#757575</color>
+    
+    <!-- Download bar colors for light theme -->
+    <color name="download_bar_background">#FFFFFF</color>
+    <color name="download_bar_text_primary">@color/text_primary_light</color>
+    <color name="download_bar_text_secondary">@color/text_secondary_light</color>
+    <color name="download_bar_icon_tint">@color/text_primary_light</color>
 </resources>

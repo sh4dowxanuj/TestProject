@@ -4,7 +4,7 @@
     android:id="@+id/downloadBar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/white"
+    android:background="@color/download_bar_background"
     android:elevation="4dp"
     android:orientation="horizontal"
     android:padding="12dp"
@@ -17,7 +17,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="12dp"
         android:src="@drawable/ic_download"
-        app:tint="@color/black" />
+        app:tint="@color/download_bar_icon_tint" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -32,7 +32,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="filename.pdf"
-            android:textColor="@color/black"
+            android:textColor="@color/download_bar_text_primary"
             android:textSize="14sp"
             android:textStyle="bold" />
 
@@ -43,7 +43,8 @@
             android:layout_height="4dp"
             android:layout_marginTop="4dp"
             android:max="100"
-            android:progress="50" />
+            android:progress="50"
+            android:progressDrawable="@drawable/progress_bar_background" />
 
         <TextView
             android:id="@+id/downloadStatus"
@@ -51,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="50% - 1.2 MB of 2.4 MB"
-            android:textColor="@color/black"
+            android:textColor="@color/download_bar_text_secondary"
             android:textSize="12sp" />
 
     </LinearLayout>
@@ -64,6 +65,6 @@
         android:layout_marginStart="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_close"
-        app:tint="@color/black" />
+        app:tint="@color/download_bar_icon_tint" />
 
 </LinearLayout>

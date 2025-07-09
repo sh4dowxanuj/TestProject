@@ -59,6 +59,7 @@ import com.example.testproject.utils.DownloadNotificationManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private static final String DEFAULT_URL = "https://www.google.com";
@@ -1005,6 +1006,9 @@ public class MainActivity extends AppCompatActivity {
         if (searchRunnable != null) {
             searchHandler.removeCallbacks(searchRunnable);
         }
+        
+        // Cancel any pending network requests
+        cancelPendingSearchRequests();
     }
 
     private void showDownloadBar(DownloadItem item) {
@@ -1107,7 +1111,7 @@ public class MainActivity extends AppCompatActivity {
             unitIndex++;
         }
         
-        return String.format("%.1f %s", size, units[unitIndex]);
+        return String.format(Locale.ROOT, "%.1f %s", size, units[unitIndex]);
     }
     
     @Override
@@ -1187,7 +1191,7 @@ public class MainActivity extends AppCompatActivity {
         
         // Determine MIME type based on file extension
         String mimeType = "image/jpeg"; // default
-        String lowerFileName = fileName.toLowerCase();
+        String lowerFileName = fileName.toLowerCase(Locale.ROOT);
         if (lowerFileName.endsWith(".png")) {
             mimeType = "image/png";
         } else if (lowerFileName.endsWith(".gif")) {
@@ -1204,4 +1208,20 @@ public class MainActivity extends AppCompatActivity {
         chromeDownloader.startDownload(imageUrl, null, "attachment; filename=\"" + fileName + "\"", mimeType);
         Toast.makeText(this, "Downloading image: " + fileName, Toast.LENGTH_SHORT).show();
     }
+
+    private void cancelPendingSearchRequests() {
+        if (suggestionProvider != null) {
+            suggestionProvider.cancelPendingRequests();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Hide search suggestions when activity is paused
+        hideSuggestions();
+        // Cancel any pending network requests to prevent memory leaks
+        cancelPendingSearchRequests();
+    }
 }
+

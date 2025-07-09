@@ -22,6 +22,7 @@ import com.example.testproject.models.DownloadItem;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 public class DownloadsActivity extends AppCompatActivity implements DownloadAdapter.OnDownloadItemClickListener {
     
@@ -208,7 +209,7 @@ public class DownloadsActivity extends AppCompatActivity implements DownloadAdap
         String extension = "";
         int lastDot = fileName.lastIndexOf('.');
         if (lastDot != -1) {
-            extension = fileName.substring(lastDot + 1).toLowerCase();
+            extension = fileName.substring(lastDot + 1).toLowerCase(Locale.ROOT);
         }
         
         switch (extension) {

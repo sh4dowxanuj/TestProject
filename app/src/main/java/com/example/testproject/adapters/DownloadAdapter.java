@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Locale;
 
 public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.DownloadViewHolder> {
     
@@ -98,6 +99,27 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.Downlo
             urlTextView.setText(download.getUrl());
             statusTextView.setText(download.getStatusText());
             
+            // Set status text color based on download status
+            int statusColor;
+            switch (download.getStatus()) {
+                case DownloadItem.STATUS_COMPLETED:
+                    statusColor = context.getResources().getColor(R.color.download_status_completed, null);
+                    break;
+                case DownloadItem.STATUS_FAILED:
+                    statusColor = context.getResources().getColor(R.color.download_status_failed, null);
+                    break;
+                case DownloadItem.STATUS_PAUSED:
+                    statusColor = context.getResources().getColor(R.color.download_status_paused, null);
+                    break;
+                case DownloadItem.STATUS_DOWNLOADING:
+                    statusColor = context.getResources().getColor(R.color.download_status_downloading, null);
+                    break;
+                default:
+                    statusColor = context.getResources().getColor(R.color.text_secondary_dark, null);
+                    break;
+            }
+            statusTextView.setTextColor(statusColor);
+            
             // Format file size
             String sizeText = formatFileSize(download.getFileSize());
             if (download.getStatus() == DownloadItem.STATUS_DOWNLOADING && download.getFileSize() > 0) {
@@ -166,7 +188,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.Downlo
                 }
             } else if (fileName != null) {
                 // Determine by file extension if MIME type is not available
-                String extension = getFileExtension(fileName).toLowerCase();
+                String extension = getFileExtension(fileName).toLowerCase(Locale.ROOT);
                 switch (extension) {
                     case "jpg": case "jpeg": case "png": case "gif": case "bmp": case "webp":
                         return R.drawable.ic_file_image;
@@ -196,7 +218,7 @@ public class DownloadAdapter extends RecyclerView.Adapter<DownloadAdapter.Downlo
             if (mimeType != null) {
                 return mimeType.startsWith("video/") || mimeType.startsWith("audio/");
             } else if (fileName != null) {
-                String extension = getFileExtension(fileName).toLowerCase();
+                String extension = getFileExtension(fileName).toLowerCase(Locale.ROOT);
                 return extension.matches("mp4|avi|mkv|mov|wmv|webm|mp3|wav|flac|aac|ogg");
             }
             
