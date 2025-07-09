@@ -7,8 +7,13 @@
     android:background="@color/download_bar_background"
     android:elevation="4dp"
     android:orientation="horizontal"
-    android:padding="12dp"
-    android:visibility="gone">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:visibility="gone"
+    android:clipToPadding="false"
+    android:animateLayoutChanges="true">
 
     <ImageView
         android:id="@+id/downloadIcon"
@@ -17,6 +22,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="12dp"
         android:src="@drawable/ic_download"
+        android:contentDescription="@string/download_icon_description"
         app:tint="@color/download_bar_icon_tint" />
 
     <LinearLayout
@@ -64,6 +70,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/download_cancel_description"
         android:src="@drawable/ic_close"
         app:tint="@color/download_bar_icon_tint" />
 

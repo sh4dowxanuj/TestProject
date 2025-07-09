@@ -25,6 +25,16 @@
         </layer-list>
     </item>
     
+    <!-- Pressed tab state -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners 
+                android:topLeftRadius="8dp"
+                android:topRightRadius="8dp" />
+            <solid android:color="@color/tab_background_hover_dark" />
+        </shape>
+    </item>
+    
     <!-- Hovered tab state -->
     <item android:state_hovered="true">
         <shape android:shape="rectangle">

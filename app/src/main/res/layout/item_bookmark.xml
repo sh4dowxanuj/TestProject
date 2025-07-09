@@ -19,6 +19,7 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@drawable/ic_bookmark_filled"
+            android:contentDescription="@string/site_icon_description"
             app:tint="@color/dark_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

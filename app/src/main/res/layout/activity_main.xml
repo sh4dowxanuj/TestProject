@@ -28,7 +28,9 @@
             android:paddingStart="8dp"
             android:paddingEnd="56dp"
             android:paddingTop="4dp"
-            android:clipToPadding="false" />
+            android:paddingBottom="4dp"
+            android:clipToPadding="false"
+            android:animateLayoutChanges="true" />
     </HorizontalScrollView>
 
     <!-- Add New Tab Button -->
@@ -38,7 +40,7 @@
         android:layout_height="32dp"
         android:layout_marginEnd="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="New Tab"
+        android:contentDescription="@string/new_tab_button_description"
         android:scaleType="center"
         android:src="@drawable/ic_add"
         app:tint="@color/tab_text_normal_dark"
@@ -57,6 +59,8 @@
         android:orientation="horizontal"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/newTabButton">
@@ -67,9 +71,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/back_button_description"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_arrow_back" />
+            android:src="@drawable/ic_arrow_back"
+            app:tint="@color/text_primary_dark" />
 
         <!-- Forward Button -->
         <ImageButton
@@ -77,9 +82,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Forward"
+            android:contentDescription="@string/forward_button_description"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_arrow_forward" />
+            android:src="@drawable/ic_arrow_forward"
+            app:tint="@color/text_primary_dark" />
 
         <!-- Refresh Button -->
         <ImageButton
@@ -87,9 +93,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Refresh"
+            android:contentDescription="@string/refresh_button_description"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_refresh" />
+            android:src="@drawable/ic_refresh"
+            app:tint="@color/text_primary_dark" />
 
         <!-- URL EditText -->
         <EditText
@@ -100,8 +107,9 @@
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:background="@drawable/url_bar_background"
-            android:hint="Enter URL or search..."
+            android:hint="@string/url_hint"
             android:imeOptions="actionGo"
+            android:importantForAutofill="no"
             android:inputType="textUri"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
@@ -117,9 +125,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Home"
+            android:contentDescription="@string/home_button_description"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_home" />
+            android:src="@drawable/ic_home"
+            app:tint="@color/text_primary_dark" />
 
         <!-- Menu Button -->
         <ImageButton
@@ -127,9 +136,10 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Menu"
+            android:contentDescription="@string/menu_button_description"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_more_vert" />
+            android:src="@drawable/ic_more_vert"
+            app:tint="@color/text_primary_dark" />
     </LinearLayout>
 
     <!-- Progress Bar -->
@@ -138,8 +148,9 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="3dp"
-        android:progressTint="@color/dark_secondary"
+        android:progressTint="@color/dark_primary"
         android:progressBackgroundTint="@color/dark_surface"
+        android:indeterminate="false"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -154,6 +165,7 @@
         android:background="@color/dark_surface"
         android:elevation="4dp"
         android:visibility="gone"
+        android:contentDescription="@string/search_suggestions_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/progressBar" />
@@ -171,7 +183,8 @@
         <WebView
             android:id="@+id/webView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:contentDescription="@string/web_content_description" />
     </FrameLayout>
 
     <!-- Download Bar -->

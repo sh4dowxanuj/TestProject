@@ -1,5 +1,28 @@
 <resources>
     <string name="app_name">Chrome Browser</string>
+    
+    <!-- Navigation buttons -->
+    <string name="back_button_description">Go back to previous page</string>
+    <string name="forward_button_description">Go forward to next page</string>
+    <string name="refresh_button_description">Refresh current page</string>
+    <string name="home_button_description">Go to home page</string>
+    <string name="menu_button_description">Open menu</string>
+    <string name="new_tab_button_description">Open new tab</string>
+    <string name="close_tab_button_description">Close tab</string>
+    
+    <!-- URL bar -->
+    <string name="url_hint">Enter URL or search…</string>
+    
+    <!-- Download bar -->
+    <string name="download_cancel_description">Cancel download</string>
+    <string name="download_icon_description">Download in progress</string>
+    
+    <!-- General -->
+    <string name="search_suggestions_description">Search suggestions</string>
+    <string name="web_content_description">Web page content</string>
+    <string name="site_icon_description">Website icon</string>
+    
+    <!-- Downloads -->
     <string name="downloads">Downloads</string>
     <string name="download_started">Download started</string>
     <string name="download_completed">Download completed</string>

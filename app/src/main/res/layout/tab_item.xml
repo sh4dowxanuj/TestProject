@@ -11,10 +11,12 @@
     android:paddingEnd="6dp"
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
-    android:layout_marginEnd="1dp"
+    android:layout_marginEnd="2dp"
     android:elevation="1dp"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:stateListAnimator="@null"
+    android:animateLayoutChanges="true">
 
     <!-- Favicon placeholder (for future enhancement) -->
     <ImageView
@@ -24,7 +26,7 @@
         android:layout_marginEnd="8dp"
         android:scaleType="centerCrop"
         android:visibility="gone"
-        android:contentDescription="Site icon" />
+        android:contentDescription="@string/site_icon_description" />
 
     <TextView
         android:id="@+id/tabTitle"
@@ -46,7 +48,7 @@
         android:layout_height="20dp"
         android:layout_marginStart="6dp"
         android:background="@drawable/tab_close_background"
-        android:contentDescription="Close Tab"
+        android:contentDescription="@string/close_tab_button_description"
         android:scaleType="center"
         android:src="@drawable/ic_tab_close_selector"
         android:padding="2dp"
