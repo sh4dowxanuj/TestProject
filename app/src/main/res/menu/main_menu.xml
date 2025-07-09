@@ -6,6 +6,11 @@
         android:title="New Tab" />
     
     <item
+        android:id="@+id/action_private_tab"
+        android:icon="@drawable/ic_private"
+        android:title="Private Tab" />
+    
+    <item
         android:id="@+id/action_bookmark"
         android:icon="@drawable/ic_bookmark_border"
         android:title="Add Bookmark" />
@@ -26,9 +31,29 @@
         android:title="Downloads" />
     
     <item
+        android:id="@+id/action_reading_mode"
+        android:icon="@drawable/ic_reading_mode"
+        android:title="Reading Mode" />
+    
+    <item
+        android:id="@+id/action_dark_mode"
+        android:icon="@drawable/ic_dark_mode"
+        android:title="Dark Mode" />
+    
+    <item
+        android:id="@+id/action_user_agent"
+        android:icon="@drawable/ic_user_agent"
+        android:title="User Agent" />
+    
+    <item
         android:id="@+id/action_share"
         android:icon="@drawable/ic_share"
         android:title="Share" />
+    
+    <item
+        android:id="@+id/action_performance"
+        android:icon="@drawable/ic_performance"
+        android:title="Performance" />
     
     <item
         android:id="@+id/action_settings"

@@ -62,6 +62,11 @@ import com.example.app.utils.AdBlocker;
 import com.example.app.utils.SearchSuggestionProvider;
 import com.example.app.utils.WebDownloader;
 import com.example.app.utils.DownloadNotificationManager;
+import com.example.app.utils.PerformanceOptimizer;
+import com.example.app.utils.ThemeManager;
+import com.example.app.utils.PrivateBrowsingManager;
+import com.example.app.utils.ReadingModeManager;
+import com.example.app.utils.UserAgentManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +105,14 @@ public class MainActivity extends AppCompatActivity {
     private AdBlocker adBlocker;
     private WebDownloader webDownloader;
     private DownloadNotificationManager downloadNotificationManager;
+    
+    // New utility managers
+    private PerformanceOptimizer performanceOptimizer;
+    private ThemeManager themeManager;
+    private PrivateBrowsingManager privateBrowsingManager;
+    private ReadingModeManager readingModeManager;
+    private UserAgentManager userAgentManager;
+    
     private boolean isInFullscreenVideo = false;
 
     // Fullscreen video
@@ -118,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
         initializeViews();
         initializeDatabase();
         initializeSearchEngine();
+        initializeUtilityManagers();
+        optimizePerformance();
         setupEventListeners();
         setupBackPressedHandler();
         
@@ -580,6 +595,28 @@ public class MainActivity extends AppCompatActivity {
     private WebView createWebView() {
         try {
             WebView webView = new WebView(this);
+            
+            // Apply performance optimizations
+            if (performanceOptimizer != null) {
+                performanceOptimizer.optimizeWebView(webView);
+            }
+            
+            // Apply theme settings
+            if (themeManager != null) {
+                themeManager.applyThemeToWebView(webView);
+            }
+            
+            // Apply private browsing settings
+            if (privateBrowsingManager != null) {
+                privateBrowsingManager.configureWebViewForPrivateMode(webView);
+            }
+            
+            // Apply user agent settings
+            if (userAgentManager != null) {
+                userAgentManager.applyUserAgent(webView);
+            }
+            
+            // Basic WebView settings (in addition to optimizations)
             WebSettings webSettings = webView.getSettings();
             webSettings.setJavaScriptEnabled(true);
             webSettings.setDomStorageEnabled(true);
@@ -588,16 +625,6 @@ public class MainActivity extends AppCompatActivity {
             webSettings.setSupportZoom(true);
             webSettings.setBuiltInZoomControls(true);
             webSettings.setDisplayZoomControls(false);
-            
-            // Memory optimization settings
-            webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-            webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-            webSettings.setDatabaseEnabled(true);
-            webSettings.setGeolocationEnabled(true);
-            
-            // Performance optimizations
-            webSettings.setEnableSmoothTransition(true);
-            webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING);
             
             // Enable fullscreen video support
             webSettings.setMediaPlaybackRequiresUserGesture(false);
@@ -722,10 +749,16 @@ public class MainActivity extends AppCompatActivity {
                         updateTabTitle(currentTabIndex);
                     }
                     
-                    // Add to history
-                    if (databaseHelper != null && url != null) {
+                    // Add to history (only if not in private mode)
+                    if (databaseHelper != null && url != null && 
+                        privateBrowsingManager != null && privateBrowsingManager.shouldSaveHistory()) {
                         HistoryItem historyItem = new HistoryItem(title, url);
                         databaseHelper.addHistoryItem(historyItem);
+                    }
+                    
+                    // Apply theme if dark mode is enabled
+                    if (themeManager != null && themeManager.isDarkModeActive()) {
+                        themeManager.applyThemeToWebView(view);
                     }
                 }
             }
@@ -926,6 +959,11 @@ public class MainActivity extends AppCompatActivity {
             webViewContainer.removeView(webViewToClose);
         }
         
+        // Clean up WebView with performance optimizer
+        if (performanceOptimizer != null) {
+            performanceOptimizer.cleanupWebView(webViewToClose);
+        }
+        
         // Destroy WebView
         webViewToClose.destroy();
         
@@ -1051,6 +1089,9 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.action_new_tab) {
                     createNewTab(DEFAULT_URL);
                     return true;
+                } else if (itemId == R.id.action_private_tab) {
+                    togglePrivateMode();
+                    return true;
                 } else if (itemId == R.id.action_bookmark) {
                     toggleBookmark();
                     return true;
@@ -1063,11 +1104,23 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.action_downloads) {
                     startActivity(new Intent(MainActivity.this, DownloadsActivity.class));
                     return true;
+                } else if (itemId == R.id.action_reading_mode) {
+                    toggleReadingMode();
+                    return true;
+                } else if (itemId == R.id.action_dark_mode) {
+                    toggleDarkMode();
+                    return true;
+                } else if (itemId == R.id.action_user_agent) {
+                    showUserAgentDialog();
+                    return true;
                 } else if (itemId == R.id.action_settings) {
                     startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     return true;
                 } else if (itemId == R.id.action_share) {
                     shareCurrentPage();
+                    return true;
+                } else if (itemId == R.id.action_performance) {
+                    showPerformanceStats();
                     return true;
                 }
                 return false;
@@ -1105,6 +1158,120 @@ public class MainActivity extends AppCompatActivity {
             shareIntent.putExtra(Intent.EXTRA_TEXT, currentWebView.getUrl());
             shareIntent.putExtra(Intent.EXTRA_SUBJECT, currentWebView.getTitle());
             startActivity(Intent.createChooser(shareIntent, "Share page"));
+        }
+    }
+
+    private void togglePrivateMode() {
+        if (privateBrowsingManager != null) {
+            boolean isPrivate = privateBrowsingManager.isPrivateModeEnabled();
+            if (isPrivate) {
+                privateBrowsingManager.disablePrivateMode();
+                Toast.makeText(this, "Private mode disabled", Toast.LENGTH_SHORT).show();
+            } else {
+                privateBrowsingManager.enablePrivateMode();
+                Toast.makeText(this, "Private mode enabled", Toast.LENGTH_SHORT).show();
+            }
+            
+            // Update all existing tabs
+            for (BrowserTab tab : tabs) {
+                if (tab.getWebView() != null) {
+                    privateBrowsingManager.configureWebViewForPrivateMode(tab.getWebView());
+                }
+            }
+        }
+    }
+    
+    private void toggleReadingMode() {
+        WebView currentWebView = getCurrentWebView();
+        if (currentWebView != null && readingModeManager != null) {
+            readingModeManager.toggleReadingMode(currentWebView);
+        }
+    }
+    
+    private void toggleDarkMode() {
+        if (themeManager != null) {
+            ThemeManager.ThemeMode currentMode = themeManager.getDarkMode();
+            if (currentMode == ThemeManager.ThemeMode.DARK) {
+                themeManager.setDarkMode(ThemeManager.ThemeMode.LIGHT);
+                Toast.makeText(this, "Light mode enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                themeManager.setDarkMode(ThemeManager.ThemeMode.DARK);
+                Toast.makeText(this, "Dark mode enabled", Toast.LENGTH_SHORT).show();
+            }
+            
+            // Apply to all tabs
+            for (BrowserTab tab : tabs) {
+                if (tab.getWebView() != null) {
+                    themeManager.applyThemeToWebView(tab.getWebView());
+                }
+            }
+        }
+    }
+    
+    private void showUserAgentDialog() {
+        if (userAgentManager == null) return;
+        
+        UserAgentManager.UserAgentType[] types = userAgentManager.getAllUserAgentTypes();
+        String[] typeNames = new String[types.length];
+        for (int i = 0; i < types.length; i++) {
+            typeNames[i] = types[i].getDisplayName();
+        }
+        
+        UserAgentManager.UserAgentType currentType = userAgentManager.getUserAgentType();
+        int selectedIndex = 0;
+        for (int i = 0; i < types.length; i++) {
+            if (types[i] == currentType) {
+                selectedIndex = i;
+                break;
+            }
+        }
+        
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Select User Agent")
+            .setSingleChoiceItems(typeNames, selectedIndex, (dialog, which) -> {
+                userAgentManager.setUserAgentType(types[which]);
+                
+                // Apply to all tabs
+                for (BrowserTab tab : tabs) {
+                    if (tab.getWebView() != null) {
+                        userAgentManager.applyUserAgent(tab.getWebView());
+                    }
+                }
+                
+                Toast.makeText(this, "User agent changed to " + types[which].getDisplayName(), 
+                    Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            })
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+    
+    private void showPerformanceStats() {
+        if (performanceOptimizer != null) {
+            PerformanceOptimizer.MemoryStats stats = performanceOptimizer.getMemoryStats();
+            
+            String message = "Memory Usage: " + stats.getFormattedUsage() + "\n" +
+                           "Active WebViews: " + stats.activeWebViews + "\n" +
+                           "Tabs: " + tabs.size();
+            
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("Performance Stats")
+                .setMessage(message)
+                .setPositiveButton("Clear Cache", (dialog, which) -> {
+                    performanceOptimizer.clearImageCache();
+                    performanceOptimizer.clearWebViewCache();
+                    Toast.makeText(this, "Cache cleared", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Close", null)
+                .show();
+        }
+    }
+    
+    private void toggleAdBlocker() {
+        if (adBlocker != null) {
+            boolean isEnabled = adBlocker.isAdBlockEnabled();
+            adBlocker.setAdBlockEnabled(!isEnabled);
+            Toast.makeText(this, "Ad Blocker " + (isEnabled ? "disabled" : "enabled"), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1160,6 +1327,29 @@ public class MainActivity extends AppCompatActivity {
         // Cleanup ad blocker
         if (adBlocker != null) {
             adBlocker = null;
+        }
+        
+        // Cleanup utility managers
+        if (performanceOptimizer != null) {
+            performanceOptimizer.clearImageCache();
+            performanceOptimizer.clearWebViewCache();
+        }
+        
+        if (themeManager != null) {
+            themeManager = null;
+        }
+        
+        if (privateBrowsingManager != null) {
+            privateBrowsingManager.clearPrivateData();
+            privateBrowsingManager = null;
+        }
+        
+        if (readingModeManager != null) {
+            readingModeManager = null;
+        }
+        
+        if (userAgentManager != null) {
+            userAgentManager = null;
         }
     }
 
@@ -1331,6 +1521,24 @@ public class MainActivity extends AppCompatActivity {
         hideSuggestionsAndKeyboard();
         // Cancel any pending network requests to prevent memory leaks
         cancelPendingSearchRequests();
+    }
+    
+    private void initializeUtilityManagers() {
+        performanceOptimizer = PerformanceOptimizer.getInstance(this);
+        themeManager = ThemeManager.getInstance(this);
+        privateBrowsingManager = PrivateBrowsingManager.getInstance(this);
+        readingModeManager = ReadingModeManager.getInstance(this);
+        userAgentManager = UserAgentManager.getInstance(this);
+    }
+    
+    private void optimizePerformance() {
+        // Preload common domains
+        performanceOptimizer.preloadDomain("google.com");
+        performanceOptimizer.preloadDomain("github.com");
+        performanceOptimizer.preloadDomain("stackoverflow.com");
+        
+        // Clean up old cache periodically
+        performanceOptimizer.cleanupPreloadCache();
     }
 }
 

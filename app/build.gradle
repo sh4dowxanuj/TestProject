@@ -82,4 +82,10 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.core:core:1.13.1'
+    
+    // Additional dependencies for new features
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-common:2.7.0'
+    implementation 'androidx.work:work-runtime:2.9.0'
+    implementation 'androidx.concurrent:concurrent-futures:1.1.0'
 }
