@@ -135,15 +135,19 @@ public class SettingsActivity extends AppCompatActivity {
     }
     
     private void updateAdBlockerStatus() {
-        if (adBlocker.isAdBlockEnabled()) {
-            int blockedCount = adBlocker.getBlockedCount();
-            String statusText = String.format("Active - %d ads blocked", blockedCount);
-            if (adBlocker.isStealthModeEnabled()) {
-                statusText += " (Stealth Mode)";
+        try {
+            if (adBlocker.isAdBlockEnabled()) {
+                int blockedCount = adBlocker.getBlockedCount();
+                String statusText = String.format("Active - %d ads blocked", blockedCount);
+                if (adBlocker.isStealthModeEnabled()) {
+                    statusText += " (Stealth Mode)";
+                }
+                adBlockerStatusText.setText(statusText);
+            } else {
+                adBlockerStatusText.setText("Disabled");
             }
-            adBlockerStatusText.setText(statusText);
-        } else {
-            adBlockerStatusText.setText("Disabled");
+        } catch (Exception e) {
+            adBlockerStatusText.setText("Error retrieving ad blocker status");
         }
     }
 

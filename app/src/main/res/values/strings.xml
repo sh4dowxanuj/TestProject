@@ -48,4 +48,7 @@
     <string name="ads_blocked">%d ads blocked</string>
     <string name="ad_blocker_active">Active - %d ads blocked</string>
     <string name="ad_blocker_stealth">Active - %d ads blocked (Stealth Mode)</string>
+    <string name="ad_blocker_error">Error: Ad Blocker failed to initialize</string>
+    <string name="ad_blocker_status_disabled">Disabled</string>
+    <string name="ad_blocker_statistics_error">Error retrieving statistics</string>
 </resources>

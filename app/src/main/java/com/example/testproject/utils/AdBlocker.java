@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
+import android.util.Log;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -13,9 +14,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class AdBlocker {
+    private static final String TAG = "AdBlocker";
     private static final String PREFS_NAME = "adblock_prefs";
     private static final String KEY_ADBLOCK_ENABLED = "adblock_enabled";
     private static final String KEY_STEALTH_MODE = "stealth_mode";
@@ -24,6 +27,8 @@ public class AdBlocker {
     private final Set<String> blockedDomains;
     private final Set<Pattern> blockedPatterns;
     private final Set<Pattern> scriptPatterns;
+    private final ConcurrentHashMap<String, Boolean> domainCache;
+    private final ConcurrentHashMap<String, Boolean> urlCache;
     
     // Common ad-serving domains and patterns
     private static final String[] AD_DOMAINS = {
@@ -175,32 +180,32 @@ public class AdBlocker {
         ".*google-analytics.*",
         ".*facebook.*\\/tr",
         ".*amazon-adsystem.*",
-        ".*\\/ads\\/",
-        ".*\\/ad\\/",
-        ".*\\/advertisement\\/",
-        ".*\\/advertising\\/",
-        ".*\\/adv\\/",
-        ".*\\/adserver\\/",
-        ".*\\/adservice\\/",
-        ".*\\/adsystem\\/",
-        ".*\\/adnxs\\/",
-        ".*\\/adform\\/",
-        ".*\\/adtech\\/",
-        ".*\\/adroll\\/",
-        ".*\\/adsense\\/",
-        ".*\\/adwords\\/",
-        ".*\\/admob\\/",
-        ".*\\/adcolony\\/",
-        ".*\\/unity3d\\/",
-        ".*\\/unityads\\/",
-        ".*\\/chartbeat\\/",
-        ".*\\/quantserve\\/",
-        ".*\\/scorecardresearch\\/",
-        ".*\\/comscore\\/",
-        ".*\\/nielsen\\/",
-        ".*\\/googletagmanager\\/",
-        ".*\\/googletagservices\\/",
-        ".*\\/googletag\\/"
+        ".*\\/ads\\/.*",
+        ".*\\/ad\\/.*",
+        ".*\\/advertisement\\/.*",
+        ".*\\/advertising\\/.*",
+        ".*\\/adv\\/.*",
+        ".*\\/adserver\\/.*",
+        ".*\\/adservice\\/.*",
+        ".*\\/adsystem\\/.*",
+        ".*\\/adnxs\\/.*",
+        ".*\\/adform\\/.*",
+        ".*\\/adtech\\/.*",
+        ".*\\/adroll\\/.*",
+        ".*\\/adsense\\/.*",
+        ".*\\/adwords\\/.*",
+        ".*\\/admob\\/.*",
+        ".*\\/adcolony\\/.*",
+        ".*\\/unity3d\\/.*",
+        ".*\\/unityads\\/.*",
+        ".*\\/chartbeat\\/.*",
+        ".*\\/quantserve\\/.*",
+        ".*\\/scorecardresearch\\/.*",
+        ".*\\/comscore\\/.*",
+        ".*\\/nielsen\\/.*",
+        ".*\\/googletagmanager\\/.*",
+        ".*\\/googletagservices\\/.*",
+        ".*\\/googletag\\/.*"
     };
     
     // Script patterns for enhanced blocking
@@ -280,25 +285,33 @@ public class AdBlocker {
         blockedDomains = new HashSet<>();
         blockedPatterns = new HashSet<>();
         scriptPatterns = new HashSet<>();
+        domainCache = new ConcurrentHashMap<>();
+        urlCache = new ConcurrentHashMap<>();
         
-        // Initialize blocked domains
-        for (String domain : AD_DOMAINS) {
-            blockedDomains.add(domain.toLowerCase());
-        }
-        
-        // Initialize blocked patterns
-        for (String pattern : AD_PATTERNS) {
-            blockedPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
-        }
-        
-        // Initialize script patterns
-        for (String pattern : SCRIPT_PATTERNS) {
-            scriptPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
+        try {
+            // Initialize blocked domains
+            for (String domain : AD_DOMAINS) {
+                blockedDomains.add(domain.toLowerCase());
+            }
+            
+            // Initialize blocked patterns
+            for (String pattern : AD_PATTERNS) {
+                blockedPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
+            }
+            
+            // Initialize script patterns
+            for (String pattern : SCRIPT_PATTERNS) {
+                scriptPatterns.add(Pattern.compile(pattern, Pattern.CASE_INSENSITIVE));
+            }
+            
+            Log.d(TAG, "AdBlocker initialized with " + getTotalBlockingRules() + " rules");
+        } catch (Exception e) {
+            Log.e(TAG, "Error initializing AdBlocker", e);
         }
     }
     
     public boolean isAdBlockEnabled() {
-        return prefs.getBoolean(KEY_ADBLOCK_ENABLED, true); // Default enabled
+        return prefs.getBoolean(KEY_ADBLOCK_ENABLED, false); // Default disabled
     }
     
     public void setAdBlockEnabled(boolean enabled) {
@@ -306,7 +319,7 @@ public class AdBlocker {
     }
     
     public boolean isStealthModeEnabled() {
-        return prefs.getBoolean(KEY_STEALTH_MODE, true); // Default enabled
+        return prefs.getBoolean(KEY_STEALTH_MODE, false); // Default disabled
     }
     
     public void setStealthModeEnabled(boolean enabled) {
@@ -314,53 +327,41 @@ public class AdBlocker {
     }
     
     public WebResourceResponse shouldBlockRequest(WebResourceRequest request) {
-        if (!isAdBlockEnabled()) {
-            return null; // Don't block if disabled
+        if (!isAdBlockEnabled() || request == null || request.getUrl() == null) {
+            return null; // Don't block if disabled or invalid request
         }
         
-        String url = request.getUrl().toString().toLowerCase();
-        String host = request.getUrl().getHost();
-        
-        if (host != null) {
-            host = host.toLowerCase();
-            
-            // Check blocked domains
-            for (String domain : blockedDomains) {
-                if (host.contains(domain)) {
-                    return createEmptyResponse();
-                }
-            }
+        String url = request.getUrl().toString();
+        if (url == null || url.isEmpty()) {
+            return null;
         }
         
-        // Check blocked patterns
-        for (Pattern pattern : blockedPatterns) {
-            if (pattern.matcher(url).matches()) {
+        // Check cache first for better performance
+        Boolean cachedResult = urlCache.get(url);
+        if (cachedResult != null) {
+            if (cachedResult) {
+                incrementBlockedCount();
                 return createEmptyResponse();
             }
+            return null;
         }
         
-        // Check script patterns for enhanced blocking
-        if (isStealthModeEnabled()) {
-            for (Pattern pattern : scriptPatterns) {
-                if (pattern.matcher(url).matches()) {
-                    return createEmptyResponse();
-                }
-            }
+        boolean shouldBlock = isBlockedInternal(url);
+        
+        // Cache the result (but limit cache size)
+        if (urlCache.size() < 1000) {
+            urlCache.put(url, shouldBlock);
+        }
+        
+        if (shouldBlock) {
+            incrementBlockedCount();
+            return createEmptyResponse();
         }
         
         return null; // Don't block
     }
     
-    private WebResourceResponse createEmptyResponse() {
-        return new WebResourceResponse("text/plain", "utf-8", 
-            new ByteArrayInputStream("".getBytes()));
-    }
-    
-    public boolean isBlocked(String url) {
-        if (!isAdBlockEnabled()) {
-            return false;
-        }
-        
+    private boolean isBlockedInternal(String url) {
         String lowerUrl = url.toLowerCase();
         String host = null;
         
@@ -376,16 +377,33 @@ public class AdBlocker {
         
         // Check blocked domains
         if (host != null) {
+            // Check domain cache first
+            Boolean cachedDomainResult = domainCache.get(host);
+            if (cachedDomainResult != null) {
+                return cachedDomainResult;
+            }
+            
+            boolean domainBlocked = false;
             for (String domain : blockedDomains) {
                 if (host.contains(domain)) {
-                    return true;
+                    domainBlocked = true;
+                    break;
                 }
+            }
+            
+            // Cache domain result
+            if (domainCache.size() < 500) {
+                domainCache.put(host, domainBlocked);
+            }
+            
+            if (domainBlocked) {
+                return true;
             }
         }
         
-        // Check blocked patterns
+        // Check blocked patterns using find() instead of matches() for better performance
         for (Pattern pattern : blockedPatterns) {
-            if (pattern.matcher(lowerUrl).matches()) {
+            if (pattern.matcher(lowerUrl).find()) {
                 return true;
             }
         }
@@ -393,7 +411,7 @@ public class AdBlocker {
         // Check script patterns for enhanced blocking
         if (isStealthModeEnabled()) {
             for (Pattern pattern : scriptPatterns) {
-                if (pattern.matcher(lowerUrl).matches()) {
+                if (pattern.matcher(lowerUrl).find()) {
                     return true;
                 }
             }
@@ -402,28 +420,75 @@ public class AdBlocker {
         return false;
     }
     
+    private WebResourceResponse createEmptyResponse() {
+        try {
+            return new WebResourceResponse("text/plain", "utf-8", 
+                new ByteArrayInputStream("".getBytes("UTF-8")));
+        } catch (Exception e) {
+            // Fallback to default encoding
+            return new WebResourceResponse("text/plain", "utf-8", 
+                new ByteArrayInputStream("".getBytes()));
+        }
+    }
+    
+    public boolean isBlocked(String url) {
+        if (!isAdBlockEnabled() || url == null || url.isEmpty()) {
+            return false;
+        }
+        
+        return isBlockedInternal(url);
+    }
+    
     public int getBlockedCount() {
         return prefs.getInt("blocked_count", 0);
     }
     
     public void incrementBlockedCount() {
-        int count = getBlockedCount();
-        prefs.edit().putInt("blocked_count", count + 1).apply();
+        synchronized (this) {
+            int count = getBlockedCount();
+            prefs.edit().putInt("blocked_count", count + 1).apply();
+        }
     }
     
     public void resetBlockedCount() {
         prefs.edit().putInt("blocked_count", 0).apply();
+        // Clear caches when resetting
+        clearCache();
+    }
+    
+    public void clearCache() {
+        domainCache.clear();
+        urlCache.clear();
+    }
+    
+    // Check if ad blocker is properly initialized
+    public boolean isInitialized() {
+        return blockedDomains != null && 
+               blockedPatterns != null && 
+               scriptPatterns != null &&
+               !blockedDomains.isEmpty() &&
+               !blockedPatterns.isEmpty() &&
+               !scriptPatterns.isEmpty();
+    }
+    
+    // Get total number of blocked domains and patterns
+    public int getTotalBlockingRules() {
+        return blockedDomains.size() + blockedPatterns.size() + scriptPatterns.size();
     }
     
     // Get statistics
     public String getStatistics() {
-        int blockedCount = getBlockedCount();
-        boolean isEnabled = isAdBlockEnabled();
-        boolean isStealthEnabled = isStealthModeEnabled();
-        
-        return String.format("Ad Blocker: %s\nStealth Mode: %s\nBlocked: %d ads", 
-            isEnabled ? "ON" : "OFF", 
-            isStealthEnabled ? "ON" : "OFF", 
-            blockedCount);
+        try {
+            int blockedCount = getBlockedCount();
+            boolean isEnabled = isAdBlockEnabled();
+            boolean isStealthEnabled = isStealthModeEnabled();
+            
+            return String.format("Ad Blocker: %s\nStealth Mode: %s\nBlocked: %d ads", 
+                isEnabled ? "ON" : "OFF", 
+                isStealthEnabled ? "ON" : "OFF", 
+                blockedCount);
+        } catch (Exception e) {
+            return "Ad Blocker: Error retrieving statistics";
+        }
     }
 }

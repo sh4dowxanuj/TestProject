@@ -26,8 +26,10 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -305,8 +307,9 @@ public class MainActivity extends AppCompatActivity {
             new SearchSuggestionAdapter.OnSuggestionClickListener() {
                 @Override
                 public void onSuggestionClick(SearchSuggestion suggestion) {
-                    hideSuggestions();
+                    hideSuggestionsAndKeyboard();
                     urlEditText.setText(suggestion.getQuery());
+                    urlEditText.clearFocus();
                     loadUrl(suggestion.getQuery());
                 }
             });
@@ -334,7 +337,8 @@ public class MainActivity extends AppCompatActivity {
                 if (actionId == EditorInfo.IME_ACTION_GO || 
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                     String text = urlEditText.getText() != null ? urlEditText.getText().toString() : "";
-                    hideSuggestions();
+                    hideSuggestionsAndKeyboard();
+                    urlEditText.clearFocus();
                     loadUrl(text);
                     return true;
                 }
@@ -363,6 +367,97 @@ public class MainActivity extends AppCompatActivity {
                 if (!hasFocus) {
                     hideSuggestions();
                 }
+            }
+        });
+
+        // Hide suggestions when user taps outside URL bar or suggestions
+        findViewById(R.id.webViewContainer).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (searchSuggestionsRecyclerView != null && 
+                        searchSuggestionsRecyclerView.getVisibility() == View.VISIBLE) {
+                        hideSuggestionsAndKeyboard();
+                        urlEditText.clearFocus();
+                    }
+                }
+                return false; // Allow other touch events to be processed
+            }
+        });
+        
+        // Hide suggestions when user taps on tab container
+        tabContainer.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (searchSuggestionsRecyclerView != null && 
+                        searchSuggestionsRecyclerView.getVisibility() == View.VISIBLE) {
+                        hideSuggestionsAndKeyboard();
+                        urlEditText.clearFocus();
+                    }
+                }
+                return false; // Allow other touch events to be processed
+            }
+        });
+        
+        // Hide suggestions when user taps on navigation bar (but not on URL bar)
+        findViewById(R.id.navigationBar).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (searchSuggestionsRecyclerView != null && 
+                        searchSuggestionsRecyclerView.getVisibility() == View.VISIBLE) {
+                        // Check if the touch is not on the URL EditText
+                        int[] urlLocation = new int[2];
+                        urlEditText.getLocationOnScreen(urlLocation);
+                        float touchX = event.getRawX();
+                        float touchY = event.getRawY();
+                        
+                        if (touchX < urlLocation[0] || touchX > urlLocation[0] + urlEditText.getWidth() ||
+                            touchY < urlLocation[1] || touchY > urlLocation[1] + urlEditText.getHeight()) {
+                            hideSuggestionsAndKeyboard();
+                            urlEditText.clearFocus();
+                        }
+                    }
+                }
+                return false; // Allow other touch events to be processed
+            }
+        });
+
+        // Hide suggestions when user taps on the root container
+        findViewById(android.R.id.content).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (searchSuggestionsRecyclerView != null && 
+                        searchSuggestionsRecyclerView.getVisibility() == View.VISIBLE) {
+                        // Check if the touch is not on the search suggestions or URL bar
+                        int[] suggestionLocation = new int[2];
+                        int[] urlLocation = new int[2];
+                        
+                        searchSuggestionsRecyclerView.getLocationOnScreen(suggestionLocation);
+                        urlEditText.getLocationOnScreen(urlLocation);
+                        
+                        float touchX = event.getRawX();
+                        float touchY = event.getRawY();
+                        
+                        boolean touchOnSuggestions = touchX >= suggestionLocation[0] && 
+                                                   touchX <= suggestionLocation[0] + searchSuggestionsRecyclerView.getWidth() &&
+                                                   touchY >= suggestionLocation[1] && 
+                                                   touchY <= suggestionLocation[1] + searchSuggestionsRecyclerView.getHeight();
+                        
+                        boolean touchOnUrlBar = touchX >= urlLocation[0] && 
+                                              touchX <= urlLocation[0] + urlEditText.getWidth() &&
+                                              touchY >= urlLocation[1] && 
+                                              touchY <= urlLocation[1] + urlEditText.getHeight();
+                        
+                        if (!touchOnSuggestions && !touchOnUrlBar) {
+                            hideSuggestionsAndKeyboard();
+                            urlEditText.clearFocus();
+                        }
+                    }
+                }
+                return false; // Allow other touch events to be processed
             }
         });
 
@@ -543,11 +638,17 @@ public class MainActivity extends AppCompatActivity {
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     // Check if the request should be blocked by ad blocker
-                    WebResourceResponse blockedResponse = adBlocker.shouldBlockRequest(request);
-                    if (blockedResponse != null) {
-                        // Increment blocked count
-                        adBlocker.incrementBlockedCount();
-                        return blockedResponse;
+                    try {
+                        if (adBlocker != null && adBlocker.isInitialized()) {
+                            WebResourceResponse blockedResponse = adBlocker.shouldBlockRequest(request);
+                            if (blockedResponse != null) {
+                                // The ad blocker already incremented the blocked count
+                                return blockedResponse;
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Log error but don't crash - continue with normal request
+                        e.printStackTrace();
                     }
                 }
                 return super.shouldInterceptRequest(view, request);
@@ -1106,6 +1207,16 @@ public class MainActivity extends AppCompatActivity {
         cancelPendingSearchRequests();
     }
 
+    private void hideSuggestionsAndKeyboard() {
+        hideSuggestions();
+        
+        // Hide the keyboard
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null && urlEditText != null) {
+            imm.hideSoftInputFromWindow(urlEditText.getWindowToken(), 0);
+        }
+    }
+
     private void showDownloadBar(DownloadItem item) {
         downloadBar.setVisibility(View.VISIBLE);
         downloadFileName.setText(item.getTitle());
@@ -1314,7 +1425,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         // Hide search suggestions when activity is paused
-        hideSuggestions();
+        hideSuggestionsAndKeyboard();
         // Cancel any pending network requests to prevent memory leaks
         cancelPendingSearchRequests();
     }
