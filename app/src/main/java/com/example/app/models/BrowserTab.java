@@ -7,11 +7,20 @@ public class BrowserTab {
     private String url;
     private WebView webView;
     private boolean isSelected;
+    private boolean isPrivate;
 
     public BrowserTab(String title, String url) {
         this.title = title;
         this.url = url;
         this.isSelected = false;
+        this.isPrivate = false;
+    }
+
+    public BrowserTab(String title, String url, boolean isPrivate) {
+        this.title = title;
+        this.url = url;
+        this.isSelected = false;
+        this.isPrivate = isPrivate;
     }
 
     public String getTitle() {
@@ -44,5 +53,13 @@ public class BrowserTab {
 
     public void setSelected(boolean selected) {
         isSelected = selected;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
     }
 }

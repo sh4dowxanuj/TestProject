@@ -48,6 +48,13 @@
     <color name="tab_close_button_dark">#9AA0A6</color>
     <color name="tab_close_button_hover_dark">#FFFFFF</color>
     
+    <!-- Private Tab colors -->
+    <color name="private_tab_background_dark">#1A1A1A</color>
+    <color name="private_tab_background_selected_dark">#2D2D2D</color>
+    <color name="private_tab_background_hover_dark">#222222</color>
+    <color name="private_tab_border_dark">#6B46C1</color>
+    <color name="private_tab_text_dark">#E8EAED</color>
+    
     <!-- Light Theme URL bar colors -->
     <color name="url_bar_background">#FFFFFF</color>
     <color name="url_bar_border">#E0E0E0</color>

@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.view.ContextThemeWrapper;
 import com.google.android.material.textfield.TextInputEditText;
 
 import com.example.app.adapters.BookmarkAdapter;
@@ -123,7 +124,8 @@ public class BookmarksActivity extends AppCompatActivity implements BookmarkAdap
     }
 
     private void showBookmarkContextMenu(Bookmark bookmark, View view) {
-        PopupMenu popup = new PopupMenu(this, view);
+        Context themedContext = new ContextThemeWrapper(this, R.style.BrowserPopupMenu);
+        PopupMenu popup = new PopupMenu(themedContext, view);
         popup.getMenuInflater().inflate(R.menu.bookmark_context_menu, popup.getMenu());
         
         popup.setOnMenuItemClickListener(item -> {

@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.view.ContextThemeWrapper;
 
 import com.example.app.adapters.HistoryAdapter;
 import com.example.app.database.DatabaseHelper;
@@ -133,7 +134,8 @@ public class HistoryActivity extends AppCompatActivity implements HistoryAdapter
     }
 
     private void showHistoryContextMenu(HistoryItem historyItem, View view) {
-        PopupMenu popup = new PopupMenu(this, view);
+        Context themedContext = new ContextThemeWrapper(this, R.style.BrowserPopupMenu);
+        PopupMenu popup = new PopupMenu(themedContext, view);
         popup.getMenuInflater().inflate(R.menu.history_context_menu, popup.getMenu());
         
         popup.setOnMenuItemClickListener(item -> {

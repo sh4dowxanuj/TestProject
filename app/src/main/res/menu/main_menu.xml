@@ -8,7 +8,7 @@
     <item
         android:id="@+id/action_private_tab"
         android:icon="@drawable/ic_private"
-        android:title="Private Tab" />
+        android:title="New Private Tab" />
     
     <item
         android:id="@+id/action_bookmark"
@@ -29,11 +29,6 @@
         android:id="@+id/action_downloads"
         android:icon="@drawable/ic_download"
         android:title="Downloads" />
-    
-    <item
-        android:id="@+id/action_reading_mode"
-        android:icon="@drawable/ic_reading_mode"
-        android:title="Reading Mode" />
     
     <item
         android:id="@+id/action_user_agent"

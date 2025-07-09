@@ -4,6 +4,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -64,7 +66,7 @@ import com.example.app.utils.WebDownloader;
 import com.example.app.utils.DownloadNotificationManager;
 import com.example.app.utils.PerformanceOptimizer;
 import com.example.app.utils.PrivateBrowsingManager;
-import com.example.app.utils.ReadingModeManager;
+
 import com.example.app.utils.UserAgentManager;
 
 import java.util.ArrayList;
@@ -108,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
     // New utility managers
     private PerformanceOptimizer performanceOptimizer;
     private PrivateBrowsingManager privateBrowsingManager;
-    private ReadingModeManager readingModeManager;
     private UserAgentManager userAgentManager;
     
     private boolean isInFullscreenVideo = false;
@@ -553,12 +554,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createNewTab(String url) {
+        createNewTab(url, false);
+    }
+    
+    /**
+     * Create a new private tab
+     */
+    private void createNewPrivateTab(String url) {
+        createNewTab(url, true);
+    }
+    
+    /**
+     * Create a new tab with private mode option
+     */
+    private void createNewTab(String url, boolean isPrivate) {
         try {
-            BrowserTab tab = new BrowserTab("New Tab", url);
+            BrowserTab tab = new BrowserTab("New Tab", url, isPrivate);
             WebView webView = createWebView();
             if (webView == null) return; // Safety check
             
             tab.setWebView(webView);
+            
+            // Configure WebView for private mode if needed
+            if (privateBrowsingManager != null) {
+                privateBrowsingManager.configureWebViewForPrivateMode(webView, isPrivate);
+                if (isPrivate) {
+                    privateBrowsingManager.addPrivateTab();
+                }
+            }
+            
             tabs.add(tab);
 
             // Create tab UI
@@ -581,6 +605,12 @@ public class MainActivity extends AppCompatActivity {
             if (webView != null && url != null && !url.isEmpty()) {
                 webView.loadUrl(url);
             }
+            
+            // Show toast for private tab
+            if (isPrivate) {
+                Toast.makeText(this, "Private tab created", Toast.LENGTH_SHORT).show();
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
             // Handle the error gracefully, maybe show a toast
@@ -597,11 +627,6 @@ public class MainActivity extends AppCompatActivity {
             // Apply performance optimizations
             if (performanceOptimizer != null) {
                 performanceOptimizer.optimizeWebView(webView);
-            }
-            
-            // Apply private browsing settings
-            if (privateBrowsingManager != null) {
-                privateBrowsingManager.configureWebViewForPrivateMode(webView);
             }
             
             // Apply user agent settings
@@ -744,9 +769,11 @@ public class MainActivity extends AppCompatActivity {
                     
                     // Add to history (only if not in private mode)
                     if (databaseHelper != null && url != null && 
-                        privateBrowsingManager != null && privateBrowsingManager.shouldSaveHistory()) {
-                        HistoryItem historyItem = new HistoryItem(title, url);
-                        databaseHelper.addHistoryItem(historyItem);
+                        privateBrowsingManager != null) {
+                        if (currentTab != null && privateBrowsingManager.shouldSaveHistory(currentTab.isPrivate())) {
+                            HistoryItem historyItem = new HistoryItem(title, url);
+                            databaseHelper.addHistoryItem(historyItem);
+                        }
                     }
                 }
             }
@@ -857,7 +884,18 @@ public class MainActivity extends AppCompatActivity {
         ImageButton closeTab = tabView.findViewById(R.id.closeTab);
 
         if (tabTitle != null && tab != null) {
-            tabTitle.setText(tab.getTitle());
+            // Show private indicator for private tabs
+            if (tab.isPrivate()) {
+                tabTitle.setText("🔒 " + tab.getTitle());
+                // Apply private tab styling
+                tabView.setBackgroundResource(R.drawable.private_tab_background);
+                tabTitle.setTextColor(getResources().getColor(R.color.private_tab_text_dark));
+            } else {
+                tabTitle.setText(tab.getTitle());
+                // Apply normal tab styling
+                tabView.setBackgroundResource(R.drawable.tab_background);
+                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark));
+            }
         }
         
         // Store the tab reference in the view's tag to avoid index issues
@@ -942,6 +980,11 @@ public class MainActivity extends AppCompatActivity {
         BrowserTab tabToClose = tabs.get(index);
         WebView webViewToClose = tabToClose.getWebView();
         
+        // Handle private tab cleanup
+        if (tabToClose.isPrivate() && privateBrowsingManager != null) {
+            privateBrowsingManager.removePrivateTab();
+        }
+        
         // Remove WebView from container if it's currently displayed
         if (webViewToClose.getParent() == webViewContainer) {
             webViewContainer.removeView(webViewToClose);
@@ -983,7 +1026,18 @@ public class MainActivity extends AppCompatActivity {
             if (tabView.getTag() instanceof BrowserTab) {
                 TextView tabTitle = tabView.findViewById(R.id.tabTitle);
                 if (tabTitle != null) {
-                    tabTitle.setText(tab.getTitle());
+                    // Show private indicator for private tabs
+                    if (tab.isPrivate()) {
+                        tabTitle.setText("🔒 " + tab.getTitle());
+                        // Ensure private tab styling is maintained
+                        tabView.setBackgroundResource(R.drawable.private_tab_background);
+                        tabTitle.setTextColor(getResources().getColor(R.color.private_tab_text_dark));
+                    } else {
+                        tabTitle.setText(tab.getTitle());
+                        // Ensure normal tab styling is maintained
+                        tabView.setBackgroundResource(R.drawable.tab_background);
+                        tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark));
+                    }
                 }
             }
         }
@@ -995,22 +1049,33 @@ public class MainActivity extends AppCompatActivity {
             
             // Verify this is actually a tab view (not the new tab button)
             if (tabView.getTag() instanceof BrowserTab) {
+                BrowserTab tab = (BrowserTab) tabView.getTag();
                 TextView tabTitle = tabView.findViewById(R.id.tabTitle);
                 tabView.setSelected(i == currentTabIndex);
                 
-                // Update text color based on selection state
+                // Update text color based on selection state and private mode
                 if (tabTitle != null) {
-                    if (i == currentTabIndex) {
+                    if (tab.isPrivate()) {
+                        // Private tab styling
                         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected_dark, getTheme()));
+                            tabTitle.setTextColor(getResources().getColor(R.color.private_tab_text_dark, getTheme()));
                         } else {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected_dark));
+                            tabTitle.setTextColor(getResources().getColor(R.color.private_tab_text_dark));
                         }
                     } else {
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark, getTheme()));
+                        // Normal tab styling
+                        if (i == currentTabIndex) {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected_dark, getTheme()));
+                            } else {
+                                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_selected_dark));
+                            }
                         } else {
-                            tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark));
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark, getTheme()));
+                            } else {
+                                tabTitle.setTextColor(getResources().getColor(R.color.tab_text_normal_dark));
+                            }
                         }
                     }
                 }
@@ -1059,7 +1124,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showMenu(View view) {
-        PopupMenu popup = new PopupMenu(this, view);
+        // Create a ContextThemeWrapper to apply our custom popup menu theme
+        Context themedContext = new ContextThemeWrapper(this, R.style.BrowserPopupMenu);
+        PopupMenu popup = new PopupMenu(themedContext, view);
         popup.getMenuInflater().inflate(R.menu.main_menu, popup.getMenu());
         
         // Update bookmark icon
@@ -1091,9 +1158,6 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 } else if (itemId == R.id.action_downloads) {
                     startActivity(new Intent(MainActivity.this, DownloadsActivity.class));
-                    return true;
-                } else if (itemId == R.id.action_reading_mode) {
-                    toggleReadingMode();
                     return true;
                 } else if (itemId == R.id.action_user_agent) {
                     showUserAgentDialog();
@@ -1147,30 +1211,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void togglePrivateMode() {
-        if (privateBrowsingManager != null) {
-            boolean isPrivate = privateBrowsingManager.isPrivateModeEnabled();
-            if (isPrivate) {
-                privateBrowsingManager.disablePrivateMode();
-                Toast.makeText(this, "Private mode disabled", Toast.LENGTH_SHORT).show();
-            } else {
-                privateBrowsingManager.enablePrivateMode();
-                Toast.makeText(this, "Private mode enabled", Toast.LENGTH_SHORT).show();
-            }
-            
-            // Update all existing tabs
-            for (BrowserTab tab : tabs) {
-                if (tab.getWebView() != null) {
-                    privateBrowsingManager.configureWebViewForPrivateMode(tab.getWebView());
-                }
-            }
-        }
-    }
-    
-    private void toggleReadingMode() {
-        WebView currentWebView = getCurrentWebView();
-        if (currentWebView != null && readingModeManager != null) {
-            readingModeManager.toggleReadingMode(currentWebView);
-        }
+        // Create a new private tab instead of toggling global mode
+        createNewPrivateTab(DEFAULT_URL);
     }
     
     private void showUserAgentDialog() {
@@ -1303,10 +1345,6 @@ public class MainActivity extends AppCompatActivity {
         if (privateBrowsingManager != null) {
             privateBrowsingManager.clearPrivateData();
             privateBrowsingManager = null;
-        }
-        
-        if (readingModeManager != null) {
-            readingModeManager = null;
         }
         
         if (userAgentManager != null) {
@@ -1487,7 +1525,6 @@ public class MainActivity extends AppCompatActivity {
     private void initializeUtilityManagers() {
         performanceOptimizer = PerformanceOptimizer.getInstance(this);
         privateBrowsingManager = PrivateBrowsingManager.getInstance(this);
-        readingModeManager = ReadingModeManager.getInstance(this);
         userAgentManager = UserAgentManager.getInstance(this);
     }
     

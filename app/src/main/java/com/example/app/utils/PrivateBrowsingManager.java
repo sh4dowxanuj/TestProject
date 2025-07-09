@@ -9,20 +9,17 @@ import android.webkit.WebViewDatabase;
 import android.os.Build;
 
 /**
- * Private browsing mode (Incognito) management
+ * Private browsing mode (Incognito) management - Chrome-like tab-based implementation
  */
 public class PrivateBrowsingManager {
     private static final String PREFS_NAME = "private_browsing_prefs";
-    private static final String KEY_PRIVATE_MODE = "private_mode";
     
     private static PrivateBrowsingManager instance;
-    private final SharedPreferences prefs;
     private final Context context;
-    private boolean isPrivateMode = false;
+    private int privateTabCount = 0;
     
     private PrivateBrowsingManager(Context context) {
         this.context = context.getApplicationContext();
-        this.prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
     
     public static synchronized PrivateBrowsingManager getInstance(Context context) {
@@ -33,38 +30,46 @@ public class PrivateBrowsingManager {
     }
     
     /**
-     * Enable private browsing mode
+     * Increment private tab count
      */
-    public void enablePrivateMode() {
-        isPrivateMode = true;
-        prefs.edit().putBoolean(KEY_PRIVATE_MODE, true).apply();
+    public void addPrivateTab() {
+        privateTabCount++;
     }
     
     /**
-     * Disable private browsing mode
+     * Decrement private tab count and cleanup if no private tabs remain
      */
-    public void disablePrivateMode() {
-        isPrivateMode = false;
-        prefs.edit().putBoolean(KEY_PRIVATE_MODE, false).apply();
-        clearPrivateData();
+    public void removePrivateTab() {
+        privateTabCount--;
+        if (privateTabCount <= 0) {
+            privateTabCount = 0;
+            clearPrivateData();
+        }
     }
     
     /**
-     * Check if private mode is enabled
+     * Check if any private tabs are open
      */
-    public boolean isPrivateModeEnabled() {
-        return isPrivateMode || prefs.getBoolean(KEY_PRIVATE_MODE, false);
+    public boolean hasPrivateTabs() {
+        return privateTabCount > 0;
     }
     
     /**
-     * Configure WebView for private browsing
+     * Get count of private tabs
      */
-    public void configureWebViewForPrivateMode(WebView webView) {
+    public int getPrivateTabCount() {
+        return privateTabCount;
+    }
+    
+    /**
+     * Configure WebView for private browsing (called for each private tab)
+     */
+    public void configureWebViewForPrivateMode(WebView webView, boolean isPrivate) {
         if (webView == null) return;
         
         WebSettings settings = webView.getSettings();
         
-        if (isPrivateModeEnabled()) {
+        if (isPrivate) {
             // Disable data storage
             settings.setDomStorageEnabled(false);
             settings.setDatabaseEnabled(false);
@@ -138,35 +143,35 @@ public class PrivateBrowsingManager {
     /**
      * Get private mode indicator text
      */
-    public String getPrivateModeIndicator() {
-        return isPrivateModeEnabled() ? "🔒 Private" : "🌐 Normal";
+    public String getPrivateModeIndicator(boolean isPrivate) {
+        return isPrivate ? "🔒 Private" : "🌐 Normal";
     }
     
     /**
-     * Should save history
+     * Should save history for this tab
      */
-    public boolean shouldSaveHistory() {
-        return !isPrivateModeEnabled();
+    public boolean shouldSaveHistory(boolean isPrivate) {
+        return !isPrivate;
     }
     
     /**
-     * Should save downloads
+     * Should save downloads for this tab
      */
-    public boolean shouldSaveDownloads() {
-        return !isPrivateModeEnabled();
+    public boolean shouldSaveDownloads(boolean isPrivate) {
+        return !isPrivate;
     }
     
     /**
-     * Should save form data
+     * Should save form data for this tab
      */
-    public boolean shouldSaveFormData() {
-        return !isPrivateModeEnabled();
+    public boolean shouldSaveFormData(boolean isPrivate) {
+        return !isPrivate;
     }
     
     /**
-     * Should save cookies
+     * Should save cookies for this tab
      */
-    public boolean shouldSaveCookies() {
-        return !isPrivateModeEnabled();
+    public boolean shouldSaveCookies(boolean isPrivate) {
+        return !isPrivate;
     }
 }

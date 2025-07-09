@@ -24,6 +24,8 @@
         <!-- Text colors -->
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+        <!-- Popup Menu styling -->
+        <item name="popupMenuStyle">@style/BrowserPopupMenu</item>
         <!-- Force dark theme -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->
@@ -54,6 +56,8 @@
         <!-- Text colors -->
         <item name="android:textColorPrimary">@color/text_primary_dark</item>
         <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+        <!-- Popup Menu styling -->
+        <item name="popupMenuStyle">@style/BrowserPopupMenu</item>
         <!-- Force dark theme -->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
         <!-- Customize your theme here. -->
@@ -71,5 +75,19 @@
         <item name="android:textColorHint">@color/text_secondary_dark</item>
         <item name="android:textColor">@color/text_primary_dark</item>
         <item name="android:padding">12dp</item>
+    </style>
+    
+    <!-- Popup Menu styling to match dark theme -->
+    <style name="BrowserPopupMenu" parent="Widget.Material3.PopupMenu">
+        <item name="android:popupBackground">@drawable/popup_menu_background</item>
+        <item name="android:textColor">@color/text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/text_secondary_dark</item>
+        <item name="android:popupElevation">12dp</item>
+        <item name="android:popupAnimationStyle">@style/PopupMenuAnimation</item>
+    </style>
+    
+    <style name="PopupMenuAnimation">
+        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 </resources>
