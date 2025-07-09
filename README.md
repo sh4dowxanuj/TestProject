@@ -2,7 +2,7 @@
 
 A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience.
 
-##### 🛡#### 🛡#### 🛡#### #### �🛡#### 🛡#### #### �🛡️ Ad Blocker Feature (NEW)
+🛡️ Ad Blocker Feature (NEW)
 - **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
 - **Stealth Mode**: Enhanced tracking protection with script blocking
 - **Undetected Blocking**: Uses sophisticated techniques to avoid detection
@@ -414,14 +414,6 @@ This project is open source and available under the [MIT License](LICENSE).
 - ✅ Search engine integration added
 - ✅ Fullscreen video UI fixes completed
 - ✅ APK output configuration centralized
-
-## 📞 Support
-
-If you encounter any issues or have suggestions:
-- Open an issue on GitHub
-- Check the documentation in the `docs/` folder
-- Review the `TAB_UI_FIXES.md` for recent tab improvements
-- Check `SIGNING_SETUP.md` for APK signing information
 
 ## 🎉 Acknowledgments
 
