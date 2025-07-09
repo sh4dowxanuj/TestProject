@@ -32,6 +32,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.DownloadListener;
 import android.view.ContextMenu;
 import android.view.MenuInflater;
@@ -54,6 +56,7 @@ import com.example.testproject.models.HistoryItem;
 import com.example.testproject.models.SearchEngine;
 import com.example.testproject.models.SearchSuggestion;
 import com.example.testproject.utils.SearchEnginePreferences;
+import com.example.testproject.utils.AdBlocker;
 import com.example.testproject.utils.SearchSuggestionProvider;
 import com.example.testproject.utils.ChromeStyleDownloader;
 import com.example.testproject.utils.DownloadNotificationManager;
@@ -92,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private int currentTabIndex = -1;
     private DatabaseHelper databaseHelper;
     private SearchEnginePreferences searchEnginePrefs;
+    private AdBlocker adBlocker;
     private ChromeStyleDownloader chromeDownloader;
     private DownloadNotificationManager downloadNotificationManager;
     private boolean isInFullscreenVideo = false;
@@ -291,6 +295,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeSearchEngine() {
         searchEnginePrefs = new SearchEnginePreferences(this);
+        adBlocker = new AdBlocker(this);
         updateUrlBarHint();
     }
 
@@ -532,6 +537,20 @@ public class MainActivity extends AppCompatActivity {
                 
                 // Let WebView handle normal URLs
                 return false;
+            }
+            
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    // Check if the request should be blocked by ad blocker
+                    WebResourceResponse blockedResponse = adBlocker.shouldBlockRequest(request);
+                    if (blockedResponse != null) {
+                        // Increment blocked count
+                        adBlocker.incrementBlockedCount();
+                        return blockedResponse;
+                    }
+                }
+                return super.shouldInterceptRequest(view, request);
             }
             
             @Override
@@ -1024,6 +1043,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateUrlBarHint();
+        // Refresh adblocker settings in case they were changed in settings
+        if (adBlocker != null) {
+            // Settings might have changed, so reinitialize if needed
+        }
     }
 
     private void handleSearchTextChange(String query) {

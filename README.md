@@ -2,9 +2,11 @@
 
 A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience.
 
-## ✨ Latest Feature: Search Suggestions
+## ✨ Latest Features: Search Suggestions & Ad Blocker
 
 🔍 **NEW**: Real-time search suggestions as you type! Get instant suggestions from your browsing history, bookmarks, and Google's autocomplete service.
+
+🛡️ **NEW**: Built-in Ad Blocker with Stealth Mode! Block ads and trackers like Brave browser with undetected protection.
 
 ## 🚀 Features
 
@@ -15,6 +17,8 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Smart URL Bar** - Intelligent URL input with real-time search suggestions
 - **Search Suggestions** - Live suggestions from history, bookmarks, and online sources
 - **Multiple Search Engines** - Choose from Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
+- **Ad Blocker** - Built-in ad blocking with Brave-like undetected protection
+- **Stealth Mode** - Enhanced tracking protection and script blocking
 - **Progress Indicator** - Visual loading progress for web pages
 - **Fullscreen Video Support** - Seamless video playback experience
 
@@ -25,7 +29,32 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Online Autocomplete** - Google-powered search suggestions
 - **Smart UI** - Suggestions hide/show intelligently with proper visual feedback
 
-## 🔍 Search Suggestions Feature (NEW)
+## �️ Ad Blocker Feature (NEW)
+
+### How it Works
+1. **Automatic Blocking** - Blocks ads and trackers automatically as you browse
+2. **Real-time Protection** - Filters requests in real-time before they load
+3. **Stealth Mode** - Enhanced protection that's harder to detect
+4. **Statistics Tracking** - Keep track of how many ads have been blocked
+5. **Easy Toggle** - Enable/disable from Settings with a single tap
+
+### Smart Features
+- **Comprehensive Blocking**: Blocks major ad networks and tracking services
+- **Stealth Mode**: Additional script blocking for enhanced privacy
+- **Undetected Protection**: Uses advanced techniques to avoid detection
+- **Performance Boost**: Faster page loading by blocking unnecessary content
+- **Battery Saving**: Reduced resource usage by blocking heavy ad scripts
+- **Data Saving**: Lower data consumption by blocking ads and trackers
+
+### Technical Details
+- Blocks 100+ major ad-serving domains including Google Ads, Facebook trackers
+- Pattern matching for comprehensive ad URL detection
+- Real-time request interception using WebView's resource loading
+- Separate stealth mode for enhanced script and tracker blocking
+- Statistics tracking with persistent counter
+- Compatible with all Android versions (API 16+)
+
+## �🔍 Search Suggestions Feature (NEW)
 
 ### How it Works
 1. **Start typing** in the URL bar
@@ -78,6 +107,9 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Responsive Design** - Adaptive UI for different screen sizes
 
 ### Security & Privacy
+- **Ad Blocker** - Block ads and trackers with Brave-like protection
+- **Stealth Mode** - Enhanced tracking protection and script blocking
+- **Undetected Blocking** - Advanced ad blocking that's hard to detect
 - **Secure Browsing** - HTTPS support with secure connections
 - **Privacy Controls** - Clear browsing data and cache
 - **Permission Management** - Proper handling of web permissions
@@ -128,7 +160,16 @@ A modern, feature-rich Android browser application built with Java, designed to 
 
 ### Version 1.0 - Latest Updates
 
-#### 🔍 Search Suggestions Feature (NEW)
+#### �️ Ad Blocker Feature (NEW)
+- **Brave-like Protection**: Advanced ad blocking similar to Brave browser
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scripts
+
+#### �🔍 Search Suggestions Feature (NEW)
 - **Real-time Suggestions**: Live search suggestions as you type in the URL bar
 - **Multiple Sources**: Combines history, bookmarks, and online Google suggestions
 - **Smart UI**: Suggestions appear with 300ms delay, hide on focus loss or back press
@@ -254,8 +295,11 @@ The build process generates APK files in the `/apk` directory:
 1. **Access settings** - Menu → Settings
 2. **Change search engine** - Tap on "Search Engine" option, select from dialog
 3. **Toggle JavaScript** - Use the JavaScript switch
-4. **Clear cache** - Tap "Clear Cache" button
-5. **Clear all data** - Tap "Clear All Data" button
+4. **Enable Ad Blocker** - Use the Ad Blocker switch to enable/disable
+5. **Enable Stealth Mode** - Use the Stealth Mode switch for enhanced protection
+6. **View blocked count** - See how many ads have been blocked below the switches
+7. **Clear cache** - Tap "Clear Cache" button
+8. **Clear all data** - Tap "Clear All Data" button (resets ad blocker count)
 
 ## 🔄 Project Structure
 

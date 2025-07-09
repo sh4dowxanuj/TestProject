@@ -16,12 +16,14 @@ import android.widget.Toast;
 
 import com.example.testproject.models.SearchEngine;
 import com.example.testproject.utils.SearchEnginePreferences;
+import com.example.testproject.utils.AdBlocker;
 
 public class SettingsActivity extends AppCompatActivity {
-    private SwitchCompat javascriptSwitch;
+    private SwitchCompat javascriptSwitch, adBlockerSwitch, stealthModeSwitch;
     private Button clearCacheButton, clearDataButton;
-    private TextView searchEngineText;
+    private TextView searchEngineText, adBlockerStatusText;
     private SearchEnginePreferences searchEnginePrefs;
+    private AdBlocker adBlocker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +31,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         searchEnginePrefs = new SearchEnginePreferences(this);
+        adBlocker = new AdBlocker(this);
         setupSystemBars();
         setupToolbar();
         initializeViews();
@@ -53,15 +56,38 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void initializeViews() {
         javascriptSwitch = findViewById(R.id.javascriptSwitch);
+        adBlockerSwitch = findViewById(R.id.adBlockerSwitch);
+        stealthModeSwitch = findViewById(R.id.stealthModeSwitch);
         clearCacheButton = findViewById(R.id.clearCacheButton);
         clearDataButton = findViewById(R.id.clearDataButton);
         searchEngineText = findViewById(R.id.searchEngineText);
+        adBlockerStatusText = findViewById(R.id.adBlockerStatusText);
     }
 
     private void setupEventListeners() {
         clearCacheButton.setOnClickListener(v -> clearCache());
         clearDataButton.setOnClickListener(v -> clearAllData());
         searchEngineText.setOnClickListener(v -> showSearchEngineDialog());
+        
+        adBlockerSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            adBlocker.setAdBlockEnabled(isChecked);
+            updateAdBlockerStatus();
+            if (isChecked) {
+                Toast.makeText(this, "Ad Blocker enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Ad Blocker disabled", Toast.LENGTH_SHORT).show();
+            }
+        });
+        
+        stealthModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            adBlocker.setStealthModeEnabled(isChecked);
+            updateAdBlockerStatus();
+            if (isChecked) {
+                Toast.makeText(this, "Stealth Mode enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Stealth Mode disabled", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void clearCache() {
@@ -80,6 +106,9 @@ public class SettingsActivity extends AppCompatActivity {
             clearCache();
             // Clear app databases
             deleteDatabase("browser.db");
+            // Reset ad blocker count
+            adBlocker.resetBlockedCount();
+            updateAdBlockerStatus();
             Toast.makeText(this, "All data cleared", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             Toast.makeText(this, "Error clearing data", Toast.LENGTH_SHORT).show();
@@ -98,6 +127,24 @@ public class SettingsActivity extends AppCompatActivity {
     private void loadSettings() {
         SearchEngine currentEngine = searchEnginePrefs.getSelectedSearchEngine();
         searchEngineText.setText(currentEngine.getName());
+        
+        // Load ad blocker settings
+        adBlockerSwitch.setChecked(adBlocker.isAdBlockEnabled());
+        stealthModeSwitch.setChecked(adBlocker.isStealthModeEnabled());
+        updateAdBlockerStatus();
+    }
+    
+    private void updateAdBlockerStatus() {
+        if (adBlocker.isAdBlockEnabled()) {
+            int blockedCount = adBlocker.getBlockedCount();
+            String statusText = String.format("Active - %d ads blocked", blockedCount);
+            if (adBlocker.isStealthModeEnabled()) {
+                statusText += " (Stealth Mode)";
+            }
+            adBlockerStatusText.setText(statusText);
+        } else {
+            adBlockerStatusText.setText("Disabled");
+        }
     }
 
     private void showSearchEngineDialog() {

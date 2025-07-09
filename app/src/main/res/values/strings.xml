@@ -39,4 +39,13 @@
     <string name="storage_permissions_denied">Storage permissions denied. Downloads may not work properly.</string>
     <string name="manage_storage_permission_needed">Please grant \'All files access\' permission for downloads</string>
     <string name="download_not_completed">Download not completed</string>
+    
+    <!-- Ad Blocker -->
+    <string name="ad_blocker_enabled">Ad Blocker enabled</string>
+    <string name="ad_blocker_disabled">Ad Blocker disabled</string>
+    <string name="stealth_mode_enabled">Stealth Mode enabled</string>
+    <string name="stealth_mode_disabled">Stealth Mode disabled</string>
+    <string name="ads_blocked">%d ads blocked</string>
+    <string name="ad_blocker_active">Active - %d ads blocked</string>
+    <string name="ad_blocker_stealth">Active - %d ads blocked (Stealth Mode)</string>
 </resources>
