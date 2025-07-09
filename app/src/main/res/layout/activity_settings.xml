@@ -141,7 +141,7 @@
                                     android:layout_height="20dp"
                                     android:layout_marginEnd="8dp"
                                     android:src="@drawable/ic_shield"
-                                    android:tint="@color/dark_primary" />
+                                    app:tint="@color/dark_primary" />
 
                                 <TextView
                                     android:layout_width="match_parent"
@@ -200,7 +200,7 @@
                                     android:layout_height="20dp"
                                     android:layout_marginEnd="8dp"
                                     android:src="@drawable/ic_stealth"
-                                    android:tint="@color/dark_primary" />
+                                    app:tint="@color/dark_primary" />
 
                                 <TextView
                                     android:layout_width="match_parent"
@@ -347,7 +347,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:fontFamily="sans-serif"
-                                android:text="A modern Chrome-like browser"
+                                android:text="A modern web browser"
                                 android:textColor="@color/text_secondary_dark"
                                 android:textSize="14sp" />
 

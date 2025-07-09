@@ -4,22 +4,22 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-  <group android:scaleX="4.5"
-         android:scaleY="4.5"
-         android:translateX="32.4"
-         android:translateY="32.4">
+  <group android:scaleX="3.0"
+         android:scaleY="3.0"
+         android:translateX="42"
+         android:translateY="42">
     <!-- Main thunderbolt shape -->
     <path
         android:fillColor="#FFD700"
-        android:pathData="M11,2L6,10h4l-1,8 5,-8h-4l1,-8z"/>
+        android:pathData="M12,2L7,10h3.5l-0.8,7 4.3,-7h-3.5l0.8,-7z"/>
     <!-- Inner highlight -->
     <path
         android:fillColor="#FFFF99"
-        android:pathData="M11,3L7.5,9h2.5l-0.8,6 3.3,-6h-2.5l0.8,-6z"/>
+        android:pathData="M12,3.5L8.5,9h2.5l-0.6,5.5 3.1,-5.5h-2.5l0.6,-5.5z"/>
     <!-- Outer glow -->
     <path
         android:fillColor="#00000000"
-        android:pathData="M11,2L6,10h4l-1,8 5,-8h-4l1,-8z"
+        android:pathData="M12,2L7,10h3.5l-0.8,7 4.3,-7h-3.5l0.8,-7z"
         android:strokeWidth="1.5"
         android:strokeColor="#FFD700"
         android:strokeLineCap="round"

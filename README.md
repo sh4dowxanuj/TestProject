@@ -2,11 +2,65 @@
 
 A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience.
 
-## ✨ Latest Features: Search Suggestions & Ad Blocker
+##### 🛡#### 🛡#### 🛡#### #### �🛡#### 🛡#### #### �🛡️ Ad Blocker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scriptsocker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settingsocker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scriptscker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scriptsocker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settingsocker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scriptscker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scriptscker Feature (NEW)
+- **Advanced Protection**: Sophisticated ad blocking with multiple filtering techniques
+- **Stealth Mode**: Enhanced tracking protection with script blocking
+- **Undetected Blocking**: Uses sophisticated techniques to avoid detection
+- **Real-time Filtering**: Blocks requests before they load for better performance
+- **Statistics Tracking**: Shows how many ads have been blocked
+- **Easy Controls**: Simple toggle switches in Settings
+- **Privacy Focused**: Blocks trackers and analytics scriptsst Features: Search Suggestions & Ad Blocker
 
 🔍 **NEW**: Real-time search suggestions as you type! Get instant suggestions from your browsing history, bookmarks, and Google's autocomplete service.
 
-🛡️ **NEW**: Built-in Ad Blocker with Stealth Mode! Block ads and trackers like Brave browser with undetected protection.
+🛡️ **NEW**: Built-in Ad Blocker with Stealth Mode! Block ads and trackers with undetected protection.
 
 ## 🚀 Features
 
@@ -17,7 +71,7 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Smart URL Bar** - Intelligent URL input with real-time search suggestions
 - **Search Suggestions** - Live suggestions from history, bookmarks, and online sources
 - **Multiple Search Engines** - Choose from Google, Bing, DuckDuckGo, Yahoo, Yandex, and Baidu
-- **Ad Blocker** - Built-in ad blocking with Brave-like undetected protection
+- **Ad Blocker** - Built-in ad blocking with undetected protection
 - **Stealth Mode** - Enhanced tracking protection and script blocking
 - **Progress Indicator** - Visual loading progress for web pages
 - **Fullscreen Video Support** - Seamless video playback experience
@@ -107,7 +161,7 @@ A modern, feature-rich Android browser application built with Java, designed to 
 - **Responsive Design** - Adaptive UI for different screen sizes
 
 ### Security & Privacy
-- **Ad Blocker** - Block ads and trackers with Brave-like protection
+- **Ad Blocker** - Block ads and trackers with advanced protection
 - **Stealth Mode** - Enhanced tracking protection and script blocking
 - **Undetected Blocking** - Advanced ad blocking that's hard to detect
 - **Secure Browsing** - HTTPS support with secure connections

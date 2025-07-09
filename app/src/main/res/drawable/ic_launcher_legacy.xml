@@ -19,12 +19,12 @@
     <!-- Main thunder bolt -->
     <path
         android:fillColor="#FFD700"
-        android:pathData="M26,8L18,24h6l-3,16 11,-16h-6l3,-16z"/>
+        android:pathData="M26,8L19,22h5l-2,14 8,-14h-5l2,-14z"/>
     
     <!-- Inner highlight for depth -->
     <path
         android:fillColor="#FFFF99"
-        android:pathData="M26,10L20,22h4l-2,12 7,-12h-4l2,-12z"/>
+        android:pathData="M26,10L20.5,20h3.5l-1.5,10 6,-10h-3.5l1.5,-10z"/>
     
     <!-- Outer glow stroke -->
     <path
@@ -33,12 +33,12 @@
         android:strokeWidth="1.5"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
-        android:pathData="M26,8L18,24h6l-3,16 11,-16h-6l3,-16z"/>
+        android:pathData="M26,8L19,22h5l-2,14 8,-14h-5l2,-14z"/>
         
     <!-- Additional glow effect -->
     <path
         android:fillColor="#FFD700"
         android:fillAlpha="0.2"
-        android:pathData="M26,8L18,24h6l-3,16 11,-16h-6l3,-16z"/>
+        android:pathData="M26,8L19,22h5l-2,14 8,-14h-5l2,-14z"/>
         
 </vector>
