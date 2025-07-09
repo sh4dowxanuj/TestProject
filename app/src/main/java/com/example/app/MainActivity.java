@@ -599,9 +599,6 @@ public class MainActivity extends AppCompatActivity {
                 performanceOptimizer.optimizeWebView(webView);
             }
             
-            // Apply theme settings (always dark mode)
-            applyDarkModeToWebView(webView);
-            
             // Apply private browsing settings
             if (privateBrowsingManager != null) {
                 privateBrowsingManager.configureWebViewForPrivateMode(webView);
@@ -751,9 +748,6 @@ public class MainActivity extends AppCompatActivity {
                         HistoryItem historyItem = new HistoryItem(title, url);
                         databaseHelper.addHistoryItem(historyItem);
                     }
-                    
-                    // Apply dark mode theme
-                    applyDarkModeToWebView(view);
                 }
             }
         });
@@ -1505,73 +1499,6 @@ public class MainActivity extends AppCompatActivity {
         
         // Clean up old cache periodically
         performanceOptimizer.cleanupPreloadCache();
-    }
-    
-    /**
-     * Apply dark mode theme directly to WebView
-     */
-    private void applyDarkModeToWebView(WebView webView) {
-        if (webView == null) return;
-        
-        WebSettings settings = webView.getSettings();
-        
-        // Force dark mode for WebView
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            settings.setAlgorithmicDarkeningAllowed(true);
-        }
-        
-        // Apply comprehensive dark mode CSS
-        String darkModeCSS = "javascript:(function() {" +
-            "if (document.getElementById('darkModeStyle')) return;" +
-            "var css = '" + getDarkModeCSS() + "';" +
-            "var style = document.createElement('style');" +
-            "style.id = 'darkModeStyle';" +
-            "style.textContent = css;" +
-            "document.head.appendChild(style);" +
-            "})()";
-        webView.evaluateJavascript(darkModeCSS, null);
-    }
-    
-    /**
-     * Get CSS for dark mode
-     */
-    private String getDarkModeCSS() {
-        return "html { " +
-               "filter: invert(1) hue-rotate(180deg) !important; " +
-               "background: #121212 !important; " +
-               "color: #ffffff !important; " +
-               "} " +
-               "body { " +
-               "background: #121212 !important; " +
-               "color: #ffffff !important; " +
-               "} " +
-               "img, video, iframe, svg, embed, object { " +
-               "filter: invert(1) hue-rotate(180deg) !important; " +
-               "} " +
-               "a { color: #bb86fc !important; } " +
-               "a:visited { color: #9c27b0 !important; } " +
-               "input, textarea, select { " +
-               "background: #2d2d2d !important; " +
-               "color: #ffffff !important; " +
-               "border: 1px solid #444 !important; " +
-               "} " +
-               "button { " +
-               "background: #333 !important; " +
-               "color: #ffffff !important; " +
-               "border: 1px solid #555 !important; " +
-               "} " +
-               "div, span, p { " +
-               "color: #ffffff !important; " +
-               "} " +
-               "table { " +
-               "background: #2d2d2d !important; " +
-               "color: #ffffff !important; " +
-               "} " +
-               "th, td { " +
-               "background: #2d2d2d !important; " +
-               "color: #ffffff !important; " +
-               "border: 1px solid #555 !important; " +
-               "}";
     }
 }
 
