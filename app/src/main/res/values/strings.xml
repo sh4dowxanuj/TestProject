@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chrome Browser</string>
+    <string name="app_name">AT Browser</string>
     
     <!-- Navigation buttons -->
     <string name="back_button_description">Go back to previous page</string>

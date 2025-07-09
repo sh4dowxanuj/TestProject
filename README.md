@@ -1,6 +1,6 @@
-# Chrome Browser - Android App
+# AT Browser - Android App
 
-A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience similar to Chrome.
+A modern, feature-rich Android browser application built with Java, designed to provide a smooth and intuitive browsing experience.
 
 ## ✨ Latest Feature: Search Suggestions
 

@@ -16,6 +16,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -116,6 +117,27 @@ public class MainActivity extends AppCompatActivity {
         
         // Create initial tab
         createNewTab(DEFAULT_URL);
+        
+        // Handle intent URLs
+        handleIntent(getIntent());
+    }
+    
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+    
+    private void handleIntent(Intent intent) {
+        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
+            Uri data = intent.getData();
+            if (data != null) {
+                String url = data.toString();
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    loadUrl(url);
+                }
+            }
+        }
     }
 
     private void setupBackPressedHandler() {
@@ -462,6 +484,56 @@ public class MainActivity extends AppCompatActivity {
             // Note: setPluginState has been deprecated as plugins are no longer supported
 
         webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                // Handle intent:// URLs
+                if (url.startsWith("intent://")) {
+                    try {
+                        Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                        if (intent.resolveActivity(getPackageManager()) != null) {
+                            startActivity(intent);
+                            return true;
+                        }
+                        
+                        // Try to get fallback URL
+                        String fallbackUrl = intent.getStringExtra("browser_fallback_url");
+                        if (fallbackUrl != null) {
+                            view.loadUrl(fallbackUrl);
+                            return true;
+                        }
+                        
+                        // If no fallback, try to open the app store
+                        String packageName = intent.getPackage();
+                        if (packageName != null) {
+                            Intent marketIntent = new Intent(Intent.ACTION_VIEW, 
+                                Uri.parse("market://details?id=" + packageName));
+                            if (marketIntent.resolveActivity(getPackageManager()) != null) {
+                                startActivity(marketIntent);
+                                return true;
+                            }
+                        }
+                    } catch (Exception e) {
+                        // If all fails, just ignore the URL
+                        return true;
+                    }
+                    return true;
+                }
+                
+                // Handle other special schemes
+                if (url.startsWith("mailto:") || url.startsWith("tel:") || url.startsWith("sms:")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
+                        return true;
+                    } catch (Exception e) {
+                        return true;
+                    }
+                }
+                
+                // Let WebView handle normal URLs
+                return false;
+            }
+            
             @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
