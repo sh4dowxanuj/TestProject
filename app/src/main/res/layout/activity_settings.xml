@@ -347,7 +347,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
                                 android:fontFamily="sans-serif"
-                                android:text="A modern web browser"
+                                android:text="A Browser Created By SH4DOWXANUJ"
                                 android:textColor="@color/text_secondary_dark"
                                 android:textSize="14sp" />
 
