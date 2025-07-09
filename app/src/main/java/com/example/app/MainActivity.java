@@ -63,7 +63,6 @@ import com.example.app.utils.SearchSuggestionProvider;
 import com.example.app.utils.WebDownloader;
 import com.example.app.utils.DownloadNotificationManager;
 import com.example.app.utils.PerformanceOptimizer;
-import com.example.app.utils.ThemeManager;
 import com.example.app.utils.PrivateBrowsingManager;
 import com.example.app.utils.ReadingModeManager;
 import com.example.app.utils.UserAgentManager;
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
     
     // New utility managers
     private PerformanceOptimizer performanceOptimizer;
-    private ThemeManager themeManager;
     private PrivateBrowsingManager privateBrowsingManager;
     private ReadingModeManager readingModeManager;
     private UserAgentManager userAgentManager;
@@ -601,10 +599,8 @@ public class MainActivity extends AppCompatActivity {
                 performanceOptimizer.optimizeWebView(webView);
             }
             
-            // Apply theme settings
-            if (themeManager != null) {
-                themeManager.applyThemeToWebView(webView);
-            }
+            // Apply theme settings (always dark mode)
+            applyDarkModeToWebView(webView);
             
             // Apply private browsing settings
             if (privateBrowsingManager != null) {
@@ -756,10 +752,8 @@ public class MainActivity extends AppCompatActivity {
                         databaseHelper.addHistoryItem(historyItem);
                     }
                     
-                    // Apply theme if dark mode is enabled
-                    if (themeManager != null && themeManager.isDarkModeActive()) {
-                        themeManager.applyThemeToWebView(view);
-                    }
+                    // Apply dark mode theme
+                    applyDarkModeToWebView(view);
                 }
             }
         });
@@ -1107,9 +1101,6 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.action_reading_mode) {
                     toggleReadingMode();
                     return true;
-                } else if (itemId == R.id.action_dark_mode) {
-                    toggleDarkMode();
-                    return true;
                 } else if (itemId == R.id.action_user_agent) {
                     showUserAgentDialog();
                     return true;
@@ -1185,26 +1176,6 @@ public class MainActivity extends AppCompatActivity {
         WebView currentWebView = getCurrentWebView();
         if (currentWebView != null && readingModeManager != null) {
             readingModeManager.toggleReadingMode(currentWebView);
-        }
-    }
-    
-    private void toggleDarkMode() {
-        if (themeManager != null) {
-            ThemeManager.ThemeMode currentMode = themeManager.getDarkMode();
-            if (currentMode == ThemeManager.ThemeMode.DARK) {
-                themeManager.setDarkMode(ThemeManager.ThemeMode.LIGHT);
-                Toast.makeText(this, "Light mode enabled", Toast.LENGTH_SHORT).show();
-            } else {
-                themeManager.setDarkMode(ThemeManager.ThemeMode.DARK);
-                Toast.makeText(this, "Dark mode enabled", Toast.LENGTH_SHORT).show();
-            }
-            
-            // Apply to all tabs
-            for (BrowserTab tab : tabs) {
-                if (tab.getWebView() != null) {
-                    themeManager.applyThemeToWebView(tab.getWebView());
-                }
-            }
         }
     }
     
@@ -1333,10 +1304,6 @@ public class MainActivity extends AppCompatActivity {
         if (performanceOptimizer != null) {
             performanceOptimizer.clearImageCache();
             performanceOptimizer.clearWebViewCache();
-        }
-        
-        if (themeManager != null) {
-            themeManager = null;
         }
         
         if (privateBrowsingManager != null) {
@@ -1525,7 +1492,6 @@ public class MainActivity extends AppCompatActivity {
     
     private void initializeUtilityManagers() {
         performanceOptimizer = PerformanceOptimizer.getInstance(this);
-        themeManager = ThemeManager.getInstance(this);
         privateBrowsingManager = PrivateBrowsingManager.getInstance(this);
         readingModeManager = ReadingModeManager.getInstance(this);
         userAgentManager = UserAgentManager.getInstance(this);
@@ -1539,6 +1505,73 @@ public class MainActivity extends AppCompatActivity {
         
         // Clean up old cache periodically
         performanceOptimizer.cleanupPreloadCache();
+    }
+    
+    /**
+     * Apply dark mode theme directly to WebView
+     */
+    private void applyDarkModeToWebView(WebView webView) {
+        if (webView == null) return;
+        
+        WebSettings settings = webView.getSettings();
+        
+        // Force dark mode for WebView
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            settings.setAlgorithmicDarkeningAllowed(true);
+        }
+        
+        // Apply comprehensive dark mode CSS
+        String darkModeCSS = "javascript:(function() {" +
+            "if (document.getElementById('darkModeStyle')) return;" +
+            "var css = '" + getDarkModeCSS() + "';" +
+            "var style = document.createElement('style');" +
+            "style.id = 'darkModeStyle';" +
+            "style.textContent = css;" +
+            "document.head.appendChild(style);" +
+            "})()";
+        webView.evaluateJavascript(darkModeCSS, null);
+    }
+    
+    /**
+     * Get CSS for dark mode
+     */
+    private String getDarkModeCSS() {
+        return "html { " +
+               "filter: invert(1) hue-rotate(180deg) !important; " +
+               "background: #121212 !important; " +
+               "color: #ffffff !important; " +
+               "} " +
+               "body { " +
+               "background: #121212 !important; " +
+               "color: #ffffff !important; " +
+               "} " +
+               "img, video, iframe, svg, embed, object { " +
+               "filter: invert(1) hue-rotate(180deg) !important; " +
+               "} " +
+               "a { color: #bb86fc !important; } " +
+               "a:visited { color: #9c27b0 !important; } " +
+               "input, textarea, select { " +
+               "background: #2d2d2d !important; " +
+               "color: #ffffff !important; " +
+               "border: 1px solid #444 !important; " +
+               "} " +
+               "button { " +
+               "background: #333 !important; " +
+               "color: #ffffff !important; " +
+               "border: 1px solid #555 !important; " +
+               "} " +
+               "div, span, p { " +
+               "color: #ffffff !important; " +
+               "} " +
+               "table { " +
+               "background: #2d2d2d !important; " +
+               "color: #ffffff !important; " +
+               "} " +
+               "th, td { " +
+               "background: #2d2d2d !important; " +
+               "color: #ffffff !important; " +
+               "border: 1px solid #555 !important; " +
+               "}";
     }
 }
 

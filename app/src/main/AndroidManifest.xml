@@ -24,13 +24,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.App"
+        android:theme="@style/Theme.App.Dark"
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|keyboardHidden|screenLayout"
-            android:theme="@style/Theme.App">
+            android:theme="@style/Theme.App.Dark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -48,18 +48,22 @@
         <activity
             android:name=".BookmarksActivity"
             android:exported="false"
+            android:theme="@style/Theme.App.Dark"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".HistoryActivity"
             android:exported="false"
+            android:theme="@style/Theme.App.Dark"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
+            android:theme="@style/Theme.App.Dark"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".DownloadsActivity"
             android:exported="false"
+            android:theme="@style/Theme.App.Dark"
             android:parentActivityName=".MainActivity" />
             
         <provider

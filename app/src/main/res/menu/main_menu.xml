@@ -36,11 +36,6 @@
         android:title="Reading Mode" />
     
     <item
-        android:id="@+id/action_dark_mode"
-        android:icon="@drawable/ic_dark_mode"
-        android:title="Dark Mode" />
-    
-    <item
         android:id="@+id/action_user_agent"
         android:icon="@drawable/ic_user_agent"
         android:title="User Agent" />

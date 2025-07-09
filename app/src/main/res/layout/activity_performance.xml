@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#f5f5f5">
+    android:background="@color/dark_background">
 
     <TextView
         android:layout_width="match_parent"
@@ -15,8 +15,8 @@
         android:textStyle="bold"
         android:gravity="center"
         android:padding="16dp"
-        android:background="#2196F3"
-        android:textColor="@android:color/white"
+        android:background="@color/dark_surface"
+        android:textColor="@color/text_primary_dark"
         android:layout_marginBottom="16dp" />
 
     <ScrollView
@@ -158,8 +158,8 @@
             android:layout_weight="1"
             android:text="Clear Cache"
             android:layout_marginEnd="8dp"
-            android:background="#2196F3"
-            android:textColor="@android:color/white" />
+            android:background="@color/dark_primary"
+            android:textColor="@color/text_primary_dark" />
 
         <Button
             android:id="@+id/optimizeButton"
@@ -169,8 +169,8 @@
             android:text="Optimize"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:background="#FF9800"
-            android:textColor="@android:color/white" />
+            android:background="@color/dark_secondary"
+            android:textColor="@color/text_primary_dark" />
 
         <Button
             android:id="@+id/forceGcButton"
@@ -179,8 +179,8 @@
             android:layout_weight="1"
             android:text="Force GC"
             android:layout_marginStart="8dp"
-            android:background="#1976D2"
-            android:textColor="@android:color/white" />
+            android:background="@color/dark_accent"
+            android:textColor="@color/text_primary_dark" />
 
     </LinearLayout>
 
